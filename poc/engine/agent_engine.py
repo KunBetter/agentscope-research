@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from agentscope.agent import Agent
+from agentscope.agent import Agent, ContextConfig, InjectionConfig
 from agentscope.credential import DeepSeekCredential
 from agentscope.event import ModelCallEndEvent
 from agentscope.message import Msg, UserMsg
@@ -32,6 +32,10 @@ class EngineConfig:
     token_budget: float | None = None
     """单轮 token 预算；None 表示不启用预算控制（2.0.5 用
     ``ReplyBudgetControlMiddleware``）。"""
+    context_config: ContextConfig | None = None
+    """上下文压缩配置；None 表示使用框架默认（trigger_ratio=0.8）。"""
+    injection_config: InjectionConfig | None = None
+    """运行时状态注入配置（时间/上下文占用）；None 使用框架默认。"""
 
     def __post_init__(self) -> None:
         self.env_files = tuple(Path(p) for p in self.env_files)
@@ -74,6 +78,9 @@ class AgentEngine:
         domain.register_tools(self.registry)
         self.toolkit = self.registry.build_toolkit()
         self.model = self._build_model()
+        self.agent = self._build_agent()
+
+    def _build_agent(self) -> Agent:
         middlewares: list = []
         if self.config.token_budget is not None:
             from agentscope.middleware import ReplyBudgetControlMiddleware
@@ -83,13 +90,19 @@ class AgentEngine:
                     token_budget=self.config.token_budget,
                 ),
             )
-        self.agent = Agent(
-            name=domain.name,
-            system_prompt=domain.system_prompt,
+        return Agent(
+            name=self.domain.name,
+            system_prompt=self.domain.system_prompt,
             model=self.model,
             toolkit=self.toolkit,
             middlewares=middlewares,
+            context_config=self.config.context_config,
+            injection_config=self.config.injection_config,
         )
+
+    def reset(self) -> None:
+        """开启全新会话：重建 Agent（新 AgentState），模型与工具不变。"""
+        self.agent = self._build_agent()
 
     def _build_model(self) -> DeepSeekChatModel:
         api_key = load_api_key(

@@ -174,5 +174,6 @@
 | 2026-08-02 | 架构升级 | 基于 hello-agent 最小形态实现业务无关引擎三层架构（engine 引擎层 / domains 领域层 / ToolRegistry 工具注册表）；stock_qa 与 weather 两个领域包端到端跑通，11 个离线测试通过 |
 | 2026-08-02 | M1 保守项 | 评测基线（stock_qa 20/20、weather 6/6，mock 100%）、Tushare 真实数据工具（收盘价 + PE/PB/ROE，带回退）、预算中间件（ReplyBudgetControlMiddleware）、权限拒绝路径验证、schema 升级（report_time/risk_note） |
 | 2026-08-02 | 解耦调整 | 数据层与 StockRec 解耦：移除 Tushare/DuckDB/AKShare 接入与真实评测模式，全部改用确定性 mock；卸载相关依赖；更新文档 |
+| 2026-08-02 | 记忆/上下文 | 短期记忆验证：`poc/run_conversation.py` 多轮会话演示（同一引擎保留上下文，第 3 轮可引用第 1 轮信息）；上下文压缩配置：`EngineConfig.context_config` 透传 `ContextConfig`（trigger/reserve），CLI 参数化，含离线测试。**发现已知限制**：压缩触发后结构化输出在 2.0.5 + DeepSeek 下不稳定（无压缩时同轮数可跑通），已记录待验证 |
 
-**当前状态**：M0 ✅；架构升级 ✅；M1 保守项落地（评测基线 100%，数据层为确定性 mock，与 StockRec 解耦）→ 下一步：M2 多 Agent，或按需再接入真实数据源。
+**当前状态**：M0 ✅；架构升级 ✅；M1 保守项落地（评测基线 100%，数据层 mock 解耦）；短期记忆验证 + 上下文压缩配置 ✅ → 下一步：模型重试/回退、工具并行验证、评测集扩充，或 M2 多 Agent。

@@ -56,6 +56,18 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="单轮 token 预算（启用 ReplyBudgetControlMiddleware，默认关闭）",
     )
+    parser.add_argument(
+        "--context-trigger-ratio",
+        type=float,
+        default=None,
+        help="上下文压缩触发阈值（ContextConfig.trigger_ratio，默认 0.8）",
+    )
+    parser.add_argument(
+        "--context-reserve-ratio",
+        type=float,
+        default=None,
+        help="压缩时保留比例（ContextConfig.reserve_ratio，默认 0.1）",
+    )
     return parser
 
 
@@ -69,12 +81,32 @@ def main() -> int:
         return 0
 
     domain = load_domain(args.domain)
+    context_config = None
+    if (
+        args.context_trigger_ratio is not None
+        or args.context_reserve_ratio is not None
+    ):
+        from agentscope.agent import ContextConfig
+
+        context_config = ContextConfig(
+            trigger_ratio=(
+                args.context_trigger_ratio
+                if args.context_trigger_ratio is not None
+                else 0.8
+            ),
+            reserve_ratio=(
+                args.context_reserve_ratio
+                if args.context_reserve_ratio is not None
+                else 0.1
+            ),
+        )
     engine = AgentEngine(
         domain,
         EngineConfig(
             model_name=args.model,
             env_files=DEFAULT_ENV_FILES,
             token_budget=args.budget,
+            context_config=context_config,
         ),
     )
 

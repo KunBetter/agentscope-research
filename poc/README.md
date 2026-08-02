@@ -76,6 +76,15 @@ poc/hello-agent/.venv/bin/python run_agent.py --domain weather --question "上�
 
 # 启用单轮 token 预算（ReplyBudgetControlMiddleware）
 poc/hello-agent/.venv/bin/python run_agent.py --domain stock_qa --budget 6000
+
+# 多轮会话演示（短期记忆：同一引擎连续多轮 = 同一会话）
+poc/hello-agent/.venv/bin/python poc/run_conversation.py --domain stock_qa
+
+# 上下文压缩演示（极低阈值触发压缩并打印日志）
+poc/hello-agent/.venv/bin/python poc/run_conversation.py --domain weather --compression-demo
+
+# 单轮问答自定义上下文压缩阈值
+poc/hello-agent/.venv/bin/python run_agent.py --domain stock_qa --context-trigger-ratio 0.5 --context-reserve-ratio 0.2
 ```
 
 API Key 加载优先级：`poc/.env` > `poc/hello-agent/.env` > 环境变量
@@ -117,7 +126,7 @@ cd poc && ../poc/hello-agent/.venv/bin/python -m pytest tests -q
 覆盖：工具注册（函数式 / 装饰器 / 分组 / 只读标记）、领域包契约、引擎装配
 （两个领域各自的工具与 schema，不共享状态）、预算中间件装配、权限判定
 （DEFAULT 模式：只读工具 ALLOW / 写工具默认需人工确认）、评测检查项
-（contains / any_of）。
+（contains / any_of / paths）、上下文配置透传与校验、会话重置。
 
 ## 7. 新增一个业务领域（三步）
 
@@ -133,5 +142,13 @@ cd poc && ../poc/hello-agent/.venv/bin/python -m pytest tests -q
 
 - 数据层：两个领域均为确定性 mock（与外部数据源和 StockRec 解耦），
   换真实源只需改 `domains/<业务>/tools.py`；
+- 短期记忆：已验证同一引擎多轮连续 run 保留上下文（多轮会话演示）；
+  长期记忆（跨会话持久化）属规划 M2，未接入；
+- 上下文管理：压缩阈值/保留比已可通过 `EngineConfig.context_config`
+  或 CLI `--context-trigger-ratio / --context-reserve-ratio` 配置；
+- 已知限制：上下文压缩触发后，结构化输出生成在 agentscope 2.0.5 +
+  DeepSeek 组合下不稳定（`--compression-demo` 可复现：压缩日志出现后
+  下一轮结构化输出失败）；默认压缩阈值（0.8）下正常对话不受影响，
+  该问题待升级版本或换结构化输出路径时验证；
 - 单 Agent 单轮：多 Agent 链路（规划 M2）将在领域包契约上扩展
   pipeline 拓扑出口，引擎层负责编排，业务层继续只提供内容。
