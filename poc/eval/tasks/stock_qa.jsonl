@@ -19,7 +19,7 @@
 {"id": "sq-019", "question": "贵州茅台 2023 年 PE 是多少？", "check": [{"path": ["financials", "*"], "contains": "28.1"}]}
 {"id": "sq-020", "question": "宁德时代 2023 年 PB 是多少？", "check": [{"path": ["financials", "*"], "contains": "5.1"}]}
 {"id": "sq-021", "question": "平安银行 2023 年 ROE 是多少？", "check": [{"path": ["financials", "*"], "contains": "11.2%"}]}
-{"id": "sq-022", "question": "贵州茅台 2020 年的 ROE 是多少？", "check": [{"paths": [["summary"], ["financials", "*"]], "any_of": ["暂无可查", "无法获取", "不存在", "没有", "未提供"]}]}
+{"id": "sq-022", "question": "贵州茅台 2020 年的 ROE 是多少？", "check": [{"paths": [["summary"], ["financials", "*"]], "any_of": ["暂无可查", "暂不可查", "不可查", "无法获取", "不存在", "没有", "未提供", "无数据"]}]}
 {"id": "sq-023", "question": "查一下 000002 的价格", "check": [{"paths": [["price"], ["summary"]], "any_of": ["未知代码", "不在可用", "无法获取", "不存在", "查询失败"]}]}
 {"id": "sq-024", "question": "300750 2024 年 PB 是多少？", "check": [{"path": ["financials", "*"], "contains": "4.3"}]}
 {"id": "sq-025", "question": "平安银行现在多少钱？顺便看下 2024 年 PE。", "check": [{"path": ["symbol"], "contains": "000001"}, {"path": ["price"], "contains": "11.23"}, {"path": ["financials", "*"], "contains": "5.2"}]}

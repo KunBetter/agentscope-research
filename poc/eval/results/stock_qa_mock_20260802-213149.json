@@ -1,0 +1,56 @@
+[
+  {
+    "id": "sq-022",
+    "question": "贵州茅台 2020 年的 ROE 是多少？",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "600519",
+      "name": "贵州茅台",
+      "price": "1420.50 元",
+      "financials": {
+        "2024": "PE=23.4, PB=7.8, ROE=33.1%（演示数据）",
+        "2023": "PE=28.1, PB=9.2, ROE=32.7%（演示数据）",
+        "2020": "工具暂无可查数据"
+      },
+      "summary": "关于贵州茅台（600519）2020 年 ROE：数据源（演示工具）仅提供 2023、2024 年财务摘要，暂无可查 2020 年财务数据，因此无法给出 2020 年 ROE 的真实数值，请以交易所及公司公告披露为准。参考数据：2023 年 ROE=32.7%，2024 年 ROE=33.1%；当前股价 1420.50 元。",
+      "source": "mock-data（演示数据工具）",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准；2020 年 ROE 因工具数据缺失未能提供。"
+    },
+    "usage": {
+      "input": 6658,
+      "output": 1191
+    },
+    "seconds": 13.44
+  },
+  {
+    "id": "w-006",
+    "question": "东京天气怎么样？",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "N/A",
+      "name": "N/A",
+      "price": null,
+      "financials": null,
+      "summary": "当前工具仅支持 A 股行情与财务数据查询，未配备天气数据接口，无法获取东京天气信息，未编造数据。",
+      "source": "mock-data（无天气数据来源）",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，天气数据请以官方气象机构为准"
+    },
+    "usage": {
+      "input": 1152,
+      "output": 639
+    },
+    "seconds": 6.69
+  }
+]

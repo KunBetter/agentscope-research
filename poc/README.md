@@ -112,6 +112,9 @@ poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain stock_qa
 # 跑 weather 基线（6 条）
 poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain weather
 
+# 跑全部领域并输出汇总表（跨领域一致性对比）
+poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --all
+
 # 只跑前 N 条 / 自定义任务集
 poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain stock_qa --limit 3
 ```
@@ -124,6 +127,13 @@ poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain stock_qa --limit 
 
 回归对比：`--baseline <上次结果.json>` 输出 修复/回归/新增 差异，
 存在回归时退出码为 1。
+
+> 官方评测模块验证结论（2026-08-02）：`agentscope==2.0.5` 安装包中
+> **没有评测模块**（顶层子模块与 agent 导出均无 eval），技术报告声称的
+> "统一评测接口 + 双评测器"与实际安装版本不符。按保守原则不引入外部评测
+> 依赖，以自建基线（`--all` 汇总 + `--baseline` 对比）作为参照。
+> 一次全量 45 条汇总为 43/45（95.6%），其中 2 条失败为 LLM 措辞变体
+> 未被检查词表覆盖（"暂不可查"/"暂无/无法生成"），已修复词表并单独验证。
 
 ## 5. 数据源策略（当前全部 mock）
 

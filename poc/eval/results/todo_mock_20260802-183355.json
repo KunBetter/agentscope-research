@@ -1,0 +1,119 @@
+[
+  {
+    "id": "td-001",
+    "question": "现在有哪些待办？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "todos": [
+        "写周报",
+        "复盘贵州茅台"
+      ],
+      "action": "query",
+      "summary": "已查询当前待办列表，共 2 项：写周报、复盘贵州茅台。",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 2205,
+      "output": 230
+    },
+    "seconds": 2.66
+  },
+  {
+    "id": "td-002",
+    "question": "待办里有没有'复盘贵州茅台'？",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "todos": [
+        "写周报",
+        "复盘贵州茅台"
+      ],
+      "action": "query",
+      "summary": "已查询当前待办列表，其中包含\"复盘贵州茅台\"（第2项），确认该待办存在。",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 2234,
+      "output": 274
+    },
+    "seconds": 3.2
+  },
+  {
+    "id": "td-003",
+    "question": "帮我加一条待办：买牛奶",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "todos": [
+        "写周报",
+        "复盘贵州茅台"
+      ],
+      "action": "denied",
+      "summary": "新增待办「买牛奶」的请求已提交，但被系统人工确认拒绝，写操作未执行，待办列表未发生变更。",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 5958,
+      "output": 752
+    },
+    "seconds": 7.9
+  },
+  {
+    "id": "td-004",
+    "question": "列出全部待办",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "todos": [
+        "写周报",
+        "复盘贵州茅台"
+      ],
+      "action": "query",
+      "summary": "已成功查询全部待办，当前共 2 条：写周报、复盘贵州茅台。",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 2215,
+      "output": 228
+    },
+    "seconds": 2.84
+  },
+  {
+    "id": "td-005",
+    "question": "查询待办数量",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "todos": [
+        "写周报",
+        "复盘贵州茅台"
+      ],
+      "action": "query",
+      "summary": "已查询待办列表，当前共有 2 条待办：写周报、复盘贵州茅台。",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 2209,
+      "output": 206
+    },
+    "seconds": 2.27
+  }
+]

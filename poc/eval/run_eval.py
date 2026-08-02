@@ -164,7 +164,58 @@ def main() -> int:
         "--baseline",
         help="对比上次结果 JSON：输出 修复/回归/新增 差异，有回归则退出码 1",
     )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="跑全部领域并输出汇总表（跨领域一致性对比）",
+    )
     args = parser.parse_args()
+
+    if args.all:
+        summary = []
+        any_fail = False
+        for domain_name in sorted(DEFAULT_TASKS):
+            tasks = load_tasks(DEFAULT_TASKS[domain_name])
+            print(f"\n=== {domain_name} ===")
+            results = asyncio.run(
+                run_tasks(domain_name, tasks, budget=args.budget),
+            )
+            passed_n = sum(1 for r in results if r["passed"])
+            accuracy = passed_n / len(results)
+            tokens = sum(
+                (r.get("usage") or {}).get("input", 0)
+                + (r.get("usage") or {}).get("output", 0)
+                for r in results
+            )
+            summary.append(
+                (domain_name, passed_n, len(results), accuracy, tokens),
+            )
+            stamp = time.strftime("%Y%m%d-%H%M%S")
+            out_path = Path(args.out_dir) / f"{domain_name}_mock_{stamp}.json"
+            out_path.write_text(
+                json.dumps(results, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+            if accuracy < args.threshold:
+                any_fail = True
+        print("\n=== 跨领域汇总 ===")
+        print(f"{'领域':<10}{'通过':<8}{'准确率':<10}{'token':<10}")
+        total_pass = 0
+        total_tasks = 0
+        total_tokens = 0
+        for domain_name, passed_n, total, accuracy, tokens in summary:
+            total_pass += passed_n
+            total_tasks += total
+            total_tokens += tokens
+            print(
+                f"{domain_name:<10}{passed_n}/{total:<6}"
+                f"{accuracy:<10.1%}{tokens:<10}",
+            )
+        print(
+            f"合计      {total_pass}/{total_tasks} "
+            f"{total_pass / total_tasks:.1%} | token {total_tokens}",
+        )
+        return 1 if any_fail else 0
 
     tasks_file = (
         Path(args.tasks_file) if args.tasks_file else DEFAULT_TASKS[args.domain]

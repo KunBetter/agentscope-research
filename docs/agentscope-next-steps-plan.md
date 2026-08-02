@@ -177,5 +177,6 @@
 | 2026-08-02 | 记忆/上下文 | 短期记忆验证：`poc/run_conversation.py` 多轮会话演示（同一引擎保留上下文，第 3 轮可引用第 1 轮信息）；上下文压缩配置：`EngineConfig.context_config` 透传 `ContextConfig`（trigger/reserve），CLI 参数化，含离线测试。**发现已知限制**：压缩触发后结构化输出在 2.0.5 + DeepSeek 下不稳定（无压缩时同轮数可跑通），已记录待验证 |
 | 2026-08-02 | 保守功能批次 | 模型重试/回退（`--max-retries`/`--fallback-model`，`ModelConfig` 透传）；工具并行调用验证（事件记录 + `*` 标记）；评测集扩充至 stock_qa 30 / weather 10（100%）；`verify.sh` 一键离线验证；`--baseline` 评测 diff；工具调用事件摘要 |
 | 2026-08-02 | 阶段 3 | HITL 写工具确认流：`EngineConfig.write_confirmation`（deny/confirm），todo 领域 `add_todo` 触发 `RequireUserConfirmEvent`，两分支端到端验证；第三个领域包 todo（只读 + 写工具）接入，引擎零改动；todo 评测 5/5；修复评测 `*` 通配符在列表上的查找 bug |
+| 2026-08-02 | 阶段 4（官方评测验证） | 验证结论：`agentscope==2.0.5` 安装包无评测模块（子模块/导出均无 eval），官方 Evaluation API 对比接入不可行；保守替代：自建评测新增 `--all` 跨领域汇总。全量 45 条一次汇总 43/45（95.6%），两条失败为检查词表未覆盖 LLM 措辞变体，已修复并单独验证 |
 
-**当前状态**：M0 ✅；架构升级 ✅；阶段 1~3 落地（模型重试/回退、短期记忆、工具并行、评测集 30+10+5 基线 100%、verify.sh、HITL 写工具确认、第三个领域包插拔）→ 下一步：阶段 4 官方 Evaluation API 对比接入（多 Agent 按需，不主动推进）。
+**当前状态**：M0 ✅；架构升级 ✅；开发列表非多 Agent 项全部落地（阶段 1~3 + 官方评测验证结论）→ 多 Agent 按需再评估；真实数据源按需再接入。
