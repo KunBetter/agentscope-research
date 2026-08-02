@@ -28,6 +28,7 @@
 | 2026-08-02 | M1 保守项：评测基线（stock_qa 20/20、weather 6/6）、Tushare 真实数据工具（带 mock 回退）、预算中间件、权限验证、schema 升级 |
 | 2026-08-02 | 解耦调整：数据层与 StockRec 解耦，全部改用确定性 mock（移除 Tushare/DuckDB/AKShare 接入与真实评测模式），保持 Agent 能力简单、可复现 |
 | 2026-08-02 | 记忆与上下文：多轮会话演示验证短期记忆；`ContextConfig` 压缩阈值/保留比可配置（EngineConfig + CLI），含离线测试 |
+| 2026-08-02 | 阶段 1 完成：模型重试/回退配置、工具并行调用验证、评测集扩充（stock_qa 30 + weather 10，100%）、verify.sh 一键验证、评测 --baseline diff、工具调用事件摘要 |
 
 **调研时间**：2026-08-01（信息以截至当日的公开资料为准）
 

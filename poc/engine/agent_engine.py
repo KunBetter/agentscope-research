@@ -3,13 +3,18 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from agentscope.agent import Agent, ContextConfig, InjectionConfig
+from agentscope.agent import Agent, ContextConfig, InjectionConfig, ModelConfig
 from agentscope.credential import DeepSeekCredential
-from agentscope.event import ModelCallEndEvent
+from agentscope.event import (
+    ModelCallEndEvent,
+    ToolCallEndEvent,
+    ToolCallStartEvent,
+)
 from agentscope.message import Msg, UserMsg
 from agentscope.model import DeepSeekChatModel
 
@@ -36,6 +41,12 @@ class EngineConfig:
     """上下文压缩配置；None 表示使用框架默认（trigger_ratio=0.8）。"""
     injection_config: InjectionConfig | None = None
     """运行时状态注入配置（时间/上下文占用）；None 使用框架默认。"""
+    model_config: ModelConfig | None = None
+    """完整模型配置（重试/回退）；与 max_retries/fallback_model 二选一。"""
+    max_retries: int | None = None
+    """模型调用重试次数简写（转成 ModelConfig.max_retries）。"""
+    fallback_model: str | None = None
+    """回退模型名简写（同凭据构建，转成 ModelConfig.fallback_model）。"""
 
     def __post_init__(self) -> None:
         self.env_files = tuple(Path(p) for p in self.env_files)
@@ -48,6 +59,7 @@ class AgentResult:
     text: str
     structured: dict | None = None
     usage: Any | None = None
+    tool_calls: list["ToolCallRecord"] | None = None
 
 
 @dataclass
@@ -56,6 +68,18 @@ class TokenUsage:
 
     input_tokens: int
     output_tokens: int
+
+
+@dataclass
+class ToolCallRecord:
+    """一次工具调用的记录（名称、耗时、是否与其他调用并行）。"""
+
+    name: str
+    call_id: str
+    started_at: float
+    ended_at: float | None = None
+    duration: float = 0.0
+    parallel: bool = False
 
 
 class AgentEngine:
@@ -98,6 +122,7 @@ class AgentEngine:
             middlewares=middlewares,
             context_config=self.config.context_config,
             injection_config=self.config.injection_config,
+            model_config=self._model_config,
         )
 
     def reset(self) -> None:
@@ -109,13 +134,31 @@ class AgentEngine:
             env_var=self.config.api_key_env_var,
             env_files=self.config.env_files,
         )
+        credential = DeepSeekCredential(api_key=api_key)
+        parameters = DeepSeekChatModel.Parameters(
+            thinking_enable=self.config.thinking_enable,
+            max_tokens=self.config.max_tokens,
+        )
+        self._model_config = self.config.model_config
+        if self._model_config is None and (
+            self.config.max_retries is not None
+            or self.config.fallback_model
+        ):
+            model_config_kwargs: dict[str, Any] = {}
+            if self.config.max_retries is not None:
+                model_config_kwargs["max_retries"] = self.config.max_retries
+            if self.config.fallback_model:
+                model_config_kwargs["fallback_model"] = DeepSeekChatModel(
+                    credential=credential,
+                    model=self.config.fallback_model,
+                    parameters=parameters,
+                    stream=self.config.stream,
+                )
+            self._model_config = ModelConfig(**model_config_kwargs)
         return DeepSeekChatModel(
-            credential=DeepSeekCredential(api_key=api_key),
+            credential=credential,
             model=self.config.model_name,
-            parameters=DeepSeekChatModel.Parameters(
-                thinking_enable=self.config.thinking_enable,
-                max_tokens=self.config.max_tokens,
-            ),
+            parameters=parameters,
             stream=self.config.stream,
         )
 
@@ -124,6 +167,8 @@ class AgentEngine:
         input_tokens = 0
         output_tokens = 0
         final_msg: Msg | None = None
+        tool_calls: list[ToolCallRecord] = []
+        call_starts: dict[str, ToolCallRecord] = {}
         async for event in self.agent.reply_stream(
             UserMsg(name="user", content=user_input),
             structured_schema=self.domain.output_schema,
@@ -134,8 +179,31 @@ class AgentEngine:
                 output_tokens += event.output_tokens
             elif isinstance(event, Msg):
                 final_msg = event
+            elif isinstance(event, ToolCallStartEvent):
+                record = ToolCallRecord(
+                    name=event.tool_call_name,
+                    call_id=event.tool_call_id,
+                    started_at=time.monotonic(),
+                )
+                call_starts[event.tool_call_id] = record
+                tool_calls.append(record)
+            elif isinstance(event, ToolCallEndEvent):
+                record = call_starts.get(event.tool_call_id)
+                if record is not None:
+                    record.ended_at = time.monotonic()
+                    record.duration = record.ended_at - record.started_at
         if final_msg is None:
             raise RuntimeError("Agent 未产生最终回复")
+        for record in tool_calls:
+            if record.ended_at is None:
+                continue
+            record.parallel = any(
+                other is not record
+                and other.ended_at is not None
+                and record.started_at < other.ended_at
+                and other.started_at < record.ended_at
+                for other in tool_calls
+            )
         usage = (
             TokenUsage(
                 input_tokens=input_tokens,
@@ -148,6 +216,7 @@ class AgentEngine:
             text=final_msg.get_text_content(),
             structured=final_msg.structured_output,
             usage=usage,
+            tool_calls=tool_calls or None,
         )
 
     def run_sync(self, user_input: str) -> AgentResult:

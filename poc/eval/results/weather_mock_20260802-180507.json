@@ -1,0 +1,26 @@
+[
+  {
+    "id": "w-010",
+    "question": "东京明天天气怎么样？",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "city": "东京",
+      "condition": "数据不可用",
+      "temperature": "数据不可用",
+      "wind": "",
+      "summary": "查询失败：当前天气数据源暂不支持该城市（可用城市：北京、上海、广州），无法提供东京的天气信息。报告基于只读演示数据，未编造任何天气内容。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，仅作架构验证",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 1923,
+      "output": 458
+    },
+    "seconds": 6.35
+  }
+]

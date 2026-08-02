@@ -68,6 +68,17 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="压缩时保留比例（ContextConfig.reserve_ratio，默认 0.1）",
     )
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=None,
+        help="模型调用重试次数（ModelConfig.max_retries）",
+    )
+    parser.add_argument(
+        "--fallback-model",
+        default=None,
+        help="回退模型名（同凭据构建，如 deepseek-v4-pro）",
+    )
     return parser
 
 
@@ -107,6 +118,8 @@ def main() -> int:
             env_files=DEFAULT_ENV_FILES,
             token_budget=args.budget,
             context_config=context_config,
+            max_retries=args.max_retries,
+            fallback_model=args.fallback_model,
         ),
     )
 
@@ -129,6 +142,14 @@ def main() -> int:
             f"\n[token] input={result.usage.input_tokens} "
             f"output={result.usage.output_tokens}",
         )
+    if result.tool_calls:
+        parallel_count = sum(1 for call in result.tool_calls if call.parallel)
+        calls = ", ".join(
+            f"{call.name}({call.duration:.1f}s)"
+            + ("*" if call.parallel else "")
+            for call in result.tool_calls
+        )
+        print(f"[工具调用] {calls}" + (f"（并行 {parallel_count} 个）" if parallel_count else ""))
     return 0
 
 

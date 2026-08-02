@@ -85,6 +85,15 @@ poc/hello-agent/.venv/bin/python poc/run_conversation.py --domain weather --comp
 
 # 单轮问答自定义上下文压缩阈值
 poc/hello-agent/.venv/bin/python run_agent.py --domain stock_qa --context-trigger-ratio 0.5 --context-reserve-ratio 0.2
+
+# 模型重试与回退
+poc/hello-agent/.venv/bin/python run_agent.py --domain stock_qa --max-retries 2 --fallback-model deepseek-v4-pro
+```
+
+一键离线验证（测试 + 装配冒烟，不调用模型）：
+
+```bash
+./verify.sh
 ```
 
 API Key 加载优先级：`poc/.env` > `poc/hello-agent/.env` > 环境变量
@@ -103,11 +112,14 @@ poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain weather
 poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain stock_qa --limit 3
 ```
 
-当前基线（2026-08-02，mock 模式）：**stock_qa 20/20（100%）**、**weather 6/6（100%）**。
+当前基线（2026-08-02，mock 模式）：**stock_qa 30/30（100%）**、**weather 10/10（100%）**。
 结果明细落在 `poc/eval/results/`；退出码在通过率低于阈值（默认 0.8）时为 1。
 检查项支持字段路径（`["financials", "*"]` 遍历 dict 值）、`any_of`
 （容忍 LLM 对错误场景的不同措辞）与 `paths`（多个字段任一命中即通过，
 如错误信息可能出现在 price 或 summary）。
+
+回归对比：`--baseline <上次结果.json>` 输出 修复/回归/新增 差异，
+存在回归时退出码为 1。
 
 ## 5. 数据源策略（当前全部 mock）
 
@@ -126,7 +138,8 @@ cd poc && ../poc/hello-agent/.venv/bin/python -m pytest tests -q
 覆盖：工具注册（函数式 / 装饰器 / 分组 / 只读标记）、领域包契约、引擎装配
 （两个领域各自的工具与 schema，不共享状态）、预算中间件装配、权限判定
 （DEFAULT 模式：只读工具 ALLOW / 写工具默认需人工确认）、评测检查项
-（contains / any_of / paths）、上下文配置透传与校验、会话重置。
+（contains / any_of / paths）、上下文配置透传与校验、会话重置、模型
+重试/回退配置。
 
 ## 7. 新增一个业务领域（三步）
 
@@ -142,6 +155,10 @@ cd poc && ../poc/hello-agent/.venv/bin/python -m pytest tests -q
 
 - 数据层：两个领域均为确定性 mock（与外部数据源和 StockRec 解耦），
   换真实源只需改 `domains/<业务>/tools.py`；
+- 模型可靠性：`--max-retries` / `--fallback-model` 可配置（`ModelConfig`
+  透传），离线测试覆盖；
+- 工具并行：已验证模型可在单轮并行调用两个独立工具（事件记录会标 `*`
+  并统计并行数）；
 - 短期记忆：已验证同一引擎多轮连续 run 保留上下文（多轮会话演示）；
   长期记忆（跨会话持久化）属规划 M2，未接入；
 - 上下文管理：压缩阈值/保留比已可通过 `EngineConfig.context_config`

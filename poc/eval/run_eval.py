@@ -156,6 +156,10 @@ def main() -> int:
     parser.add_argument("--budget", type=float, help="单轮 token 预算")
     parser.add_argument("--threshold", type=float, default=0.8, help="通过率阈值")
     parser.add_argument("--out-dir", default=ROOT / "eval" / "results")
+    parser.add_argument(
+        "--baseline",
+        help="对比上次结果 JSON：输出 修复/回归/新增 差异，有回归则退出码 1",
+    )
     args = parser.parse_args()
 
     tasks_file = (
@@ -179,6 +183,40 @@ def main() -> int:
         f" | 准确率: {passed / len(results):.1%}"
         f" | token 合计: {total_tokens}",
     )
+
+    if args.baseline:
+        baseline = json.loads(Path(args.baseline).read_text(encoding="utf-8"))
+        base_map = {entry["id"]: entry["passed"] for entry in baseline}
+        new_map = {entry["id"]: entry["passed"] for entry in results}
+        fixed = [
+            task_id
+            for task_id in base_map
+            if task_id in new_map
+            and base_map[task_id] is False
+            and new_map[task_id] is True
+        ]
+        regressed = [
+            task_id
+            for task_id in base_map
+            if task_id in new_map
+            and base_map[task_id] is True
+            and new_map[task_id] is False
+        ]
+        new_tasks = [
+            task_id for task_id in new_map if task_id not in base_map
+        ]
+        print(
+            f"\n基线对比({Path(args.baseline).name}): "
+            f"修复 {len(fixed)} | 回归 {len(regressed)} | 新增 {len(new_tasks)}",
+        )
+        for task_id in fixed:
+            print(f"  ✓ 修复 {task_id}")
+        for task_id in regressed:
+            print(f"  ✗ 回归 {task_id}")
+        for task_id in new_tasks:
+            print(f"  + 新增 {task_id}")
+        if regressed:
+            return 1
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,247 @@
+[
+  {
+    "id": "w-001",
+    "question": "北京今天天气怎么样？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "city": "北京",
+      "condition": "晴",
+      "temperature": "28°C",
+      "wind": "北风3级",
+      "summary": "北京今天天气晴朗，气温28°C，北风3级，体感舒适，适合户外活动。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，仅作架构验证",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 1891,
+      "output": 291
+    },
+    "seconds": 5.41
+  },
+  {
+    "id": "w-002",
+    "question": "上海天气如何？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "city": "上海",
+      "condition": "小雨",
+      "temperature": "26°C",
+      "wind": "东南风2级",
+      "summary": "上海当前有小雨，气温26°C，东南风2级，出行请携带雨具。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，仅作架构验证",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 1896,
+      "output": 333
+    },
+    "seconds": 3.0
+  },
+  {
+    "id": "w-003",
+    "question": "广州今天天气？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "city": "广州",
+      "condition": "多云",
+      "temperature": "31°C",
+      "wind": "南风2级",
+      "summary": "广州今天多云，气温31°C，南风2级，体感较为炎热，请注意防暑补水。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，仅作架构验证",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 1885,
+      "output": 285
+    },
+    "seconds": 3.29
+  },
+  {
+    "id": "w-004",
+    "question": "北京的气温是多少？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "city": "北京",
+      "condition": "晴",
+      "temperature": "28°C",
+      "wind": "北风3级",
+      "summary": "北京当前天气晴朗，气温28°C，北风3级，体感舒适。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，仅作架构验证",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 1889,
+      "output": 314
+    },
+    "seconds": 3.38
+  },
+  {
+    "id": "w-005",
+    "question": "上海气温多少？",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "city": "上海",
+      "condition": "小雨",
+      "temperature": "26°C",
+      "wind": "东南风2级",
+      "summary": "上海当前为小雨天气，气温26°C，东南风2级，出门请携带雨具。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，仅作架构验证",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 1897,
+      "output": 272
+    },
+    "seconds": 2.83
+  },
+  {
+    "id": "w-006",
+    "question": "东京天气怎么样？",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "city": "东京",
+      "condition": "数据暂不可用",
+      "temperature": "未知",
+      "wind": "未知",
+      "summary": "天气数据源暂不支持东京，当前仅支持北京、上海、广州。无法获取东京的天气信息，未提供任何编造数据。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，仅作架构验证",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 1896,
+      "output": 377
+    },
+    "seconds": 4.22
+  },
+  {
+    "id": "w-007",
+    "question": "广州气温多少？",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "city": "广州",
+      "condition": "多云",
+      "temperature": "31°C",
+      "wind": "南风2级",
+      "summary": "广州当前天气多云，气温31°C，南风2级，体感偏热。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，仅作架构验证",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 1894,
+      "output": 295
+    },
+    "seconds": 2.98
+  },
+  {
+    "id": "w-008",
+    "question": "北京的风力怎么样？",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "city": "北京",
+      "condition": "晴",
+      "temperature": "28°C",
+      "wind": "北风3级",
+      "summary": "北京当前为晴天，气温28°C，北风3级，风力适中，体感舒适。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，仅作架构验证",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 1897,
+      "output": 309
+    },
+    "seconds": 3.35
+  },
+  {
+    "id": "w-009",
+    "question": "上海天气和气温分别是？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "city": "上海",
+      "condition": "小雨",
+      "temperature": "26°C",
+      "wind": "东南风2级",
+      "summary": "上海当前为小雨天气，气温26°C，东南风2级，出门请携带雨具。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，仅作架构验证",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 1905,
+      "output": 304
+    },
+    "seconds": 3.2
+  },
+  {
+    "id": "w-010",
+    "question": "东京明天天气怎么样？",
+    "passed": false,
+    "checks": [
+      false
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "city": "东京",
+      "condition": "数据不可用",
+      "temperature": "未知",
+      "wind": "未知",
+      "summary": "查询失败：数据源不支持城市「东京」，可用城市为北京、上海、广州。已遵守规则未编造天气信息，故无法提供东京的天气报告。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，仅作架构验证",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 1941,
+      "output": 466
+    },
+    "seconds": 5.35
+  }
+]

@@ -3,4 +3,8 @@
 {"id": "w-003", "question": "广州今天天气？", "check": [{"path": ["city"], "contains": "广州"}, {"path": ["condition"], "contains": "多云"}]}
 {"id": "w-004", "question": "北京的气温是多少？", "check": [{"path": ["city"], "contains": "北京"}, {"path": ["temperature"], "contains": "28°C"}]}
 {"id": "w-005", "question": "上海气温多少？", "check": [{"path": ["temperature"], "contains": "26°C"}]}
-{"id": "w-006", "question": "东京天气怎么样？", "check": [{"paths": [["summary"], ["condition"]], "any_of": ["不存在", "未知城市", "无法获取"]}]}
+{"id": "w-006", "question": "东京天气怎么样？", "check": [{"paths": [["summary"], ["condition"]], "any_of": ["不存在", "未知城市", "不支持", "未编造", "无法获取", "无法提供", "查询失败"]}]}
+{"id": "w-007", "question": "广州气温多少？", "check": [{"path": ["temperature"], "contains": "31°C"}]}
+{"id": "w-008", "question": "北京的风力怎么样？", "check": [{"path": ["wind"], "contains": "北风"}]}
+{"id": "w-009", "question": "上海天气和气温分别是？", "check": [{"path": ["condition"], "contains": "小雨"}, {"path": ["temperature"], "contains": "26°C"}]}
+{"id": "w-010", "question": "东京明天天气怎么样？", "check": [{"paths": [["summary"], ["condition"]], "any_of": ["不存在", "未知城市", "不支持", "未编造", "无法获取", "无法提供", "查询失败"]}]}
