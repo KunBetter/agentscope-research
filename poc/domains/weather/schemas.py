@@ -16,3 +16,6 @@ class WeatherReport(BaseModel):
         default="演示数据，仅作架构验证",
         description="免责声明",
     )
+    report_time: str = Field(
+        description="报告生成时间（YYYY-MM-DD）",
+    )

@@ -51,6 +51,12 @@ def build_parser() -> argparse.ArgumentParser:
         default="deepseek-v4-flash",
         help="模型名（默认 deepseek-v4-flash）",
     )
+    parser.add_argument(
+        "--budget",
+        type=float,
+        default=None,
+        help="单轮 token 预算（启用 ReplyBudgetControlMiddleware，默认关闭）",
+    )
     return parser
 
 
@@ -69,6 +75,7 @@ def main() -> int:
         EngineConfig(
             model_name=args.model,
             env_files=DEFAULT_ENV_FILES,
+            token_budget=args.budget,
         ),
     )
 

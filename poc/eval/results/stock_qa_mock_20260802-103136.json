@@ -1,0 +1,523 @@
+[
+  {
+    "id": "sq-001",
+    "question": "贵州茅台（600519）现在多少钱？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "600519",
+      "name": "贵州茅台",
+      "price": "1420.50 元",
+      "financials": {
+        "PE_TTM": "23.4",
+        "PB": "7.8",
+        "ROE": "33.1%"
+      },
+      "summary": "贵州茅台（600519）最新价为 1420.50 元。2024 年财务摘要显示：PE(TTM) 约 23.4 倍、PB 约 7.8 倍、ROE 约 33.1%，盈利质量稳健，估值处于白酒龙头合理区间。数据来自工具返回结果（演示数据）。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 9.06
+  },
+  {
+    "id": "sq-002",
+    "question": "平安银行（000001）现在多少钱？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "000001",
+      "name": "平安银行",
+      "price": "11.23 元（演示数据）",
+      "financials": {
+        "PE_TTM": "5.2",
+        "PB": "0.6",
+        "ROE": "11.8%",
+        "year": "2024"
+      },
+      "summary": "平安银行（000001）最新价格为 11.23 元（演示数据）。2024 年财务摘要显示：PE(TTM) 约 5.2 倍，PB 约 0.6 倍，ROE 约 11.8%。整体估值处于银行板块较低水平，盈利能力保持相对稳健。数据仅供演示参考。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 6.95
+  },
+  {
+    "id": "sq-003",
+    "question": "宁德时代（300750）现在多少钱？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "300750",
+      "name": "宁德时代",
+      "price": "198.76 元（演示数据）",
+      "financials": {
+        "PE_TTM": "21.6",
+        "PB": "4.3",
+        "ROE": "21.2%（2024年，演示数据）"
+      },
+      "summary": "宁德时代（300750）最新价格约 198.76 元（演示数据）。财务方面，2024 年 PE(TTM) 约 21.6 倍、PB 约 4.3 倍、ROE 约 21.2%，整体盈利能力与估值水平在新能源电池龙头中较为稳健。以上数据均来自工具返回的演示数据，仅供参考。",
+      "source": "mock-data（演示数据）",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 6.6
+  },
+  {
+    "id": "sq-004",
+    "question": "600519 的股价是多少？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "600519",
+      "name": "贵州茅台",
+      "price": "1420.50 元",
+      "financials": {
+        "PE_TTM": "23.4",
+        "PB": "7.8",
+        "ROE": "33.1%"
+      },
+      "summary": "600519（贵州茅台）当前股价为 1420.50 元。根据 2024 年财务摘要，PE(TTM) 约 23.4 倍，PB 约 7.8 倍，ROE 高达 33.1%，显示公司盈利能力和股东回报水平较强。估值处于白酒龙头合理区间，但股价与估值均以工具返回数据为准。",
+      "source": "mock-data（演示数据，优先 Tushare，失败回退）",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 6.83
+  },
+  {
+    "id": "sq-005",
+    "question": "帮我查一下 000001 的最新价格",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "000001",
+      "name": "平安银行",
+      "price": "11.23 元",
+      "financials": {
+        "PE_TTM": "5.2",
+        "PB": "0.6",
+        "ROE": "11.8%"
+      },
+      "summary": "000001（平安银行）最新价为 11.23 元。财务方面，2024 年 PE(TTM) 约 5.2 倍、PB 约 0.6 倍、ROE 约 11.8%，估值处于银行板块偏低水平，盈利指标稳健。以上数据均为演示数据。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 5.87
+  },
+  {
+    "id": "sq-006",
+    "question": "贵州茅台 2024 年的 ROE 是多少？",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "600519",
+      "name": "贵州茅台",
+      "price": "1420.50 元（演示数据）",
+      "financials": {
+        "2024": "PE=23.4，PB=7.8，ROE=33.1%（演示数据）"
+      },
+      "summary": "贵州茅台（600519）2024 年财务摘要显示 ROE 为 33.1%，PB 为 7.8，PE(TTM) 为 23.4。ROE 处于较高水平，反映公司在演示数据口径下盈利能力较强。当前价格 1420.50 元（演示数据）。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 13.06
+  },
+  {
+    "id": "sq-007",
+    "question": "平安银行 2024 年财务数据（PE/PB/ROE）是多少？",
+    "passed": false,
+    "checks": [
+      false
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "000001",
+      "name": "平安银行",
+      "price": "11.23 元（演示数据）",
+      "financials": {
+        "2024年": "PE_TTM=5.2, PB=0.6, ROE=11.8%"
+      },
+      "summary": "平安银行（000001）最新价格为 11.23 元。2024 年财务摘要显示：PE(TTM) 为 5.2 倍，PB 为 0.6 倍，ROE 为 11.8%。整体来看，估值处于较低水平（PE、PB 均不高），ROE 保持在双位数，显示公司具备一定的盈利能力，属于典型的低估值银行股特征。数据来自工具返回，仅作演示参考。",
+      "source": "mock-data（工具返回演示数据）",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 12.54
+  },
+  {
+    "id": "sq-008",
+    "question": "宁德时代 2023 年的 ROE 是多少？",
+    "passed": false,
+    "checks": [
+      false
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "300750",
+      "name": "宁德时代",
+      "price": "198.76 元（演示数据）",
+      "financials": {
+        "PE_TTM": "24.8",
+        "PB": "5.1",
+        "ROE": "20.6%",
+        "year": "2023"
+      },
+      "summary": "宁德时代（300750）2023 年财务摘要显示 ROE 为 20.6%，盈利能力保持较强水平。同期 PE(TTM) 约 24.8 倍，PB 约 5.1 倍。当前最新价为 198.76 元。注：本次返回数据为演示数据，若需精确数值请以公司年报或交易所披露为准。",
+      "source": "mock-data（Tushare 优先，失败回退演示数据）",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 8.28
+  },
+  {
+    "id": "sq-009",
+    "question": "贵州茅台现在多少钱？顺便看一下 2024 年 ROE。",
+    "passed": false,
+    "checks": [
+      true,
+      true,
+      false
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "600519",
+      "name": "贵州茅台",
+      "price": "1420.50 元",
+      "financials": {
+        "PE_TTM": "23.4",
+        "PB": "7.8",
+        "ROE": "33.1%"
+      },
+      "summary": "贵州茅台（600519）当前价格为 1420.50 元。2024 年财务指标显示：PE(TTM) 23.4 倍、PB 7.8 倍、ROE 33.1%。ROE 超过 30%，显示公司盈利能力保持较强水平；PE 处于相对合理区间。以上数据均为演示数据，仅供演示参考。",
+      "source": "mock-data（Tushare 优先，失败回退演示数据）",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 7.04
+  },
+  {
+    "id": "sq-010",
+    "question": "平安银行 2024 年 PE 是多少？",
+    "passed": false,
+    "checks": [
+      false
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "000001",
+      "name": "平安银行",
+      "price": "11.23 元（演示数据）",
+      "financials": {
+        "PE": "5.2",
+        "PB": "0.6",
+        "ROE": "11.8%"
+      },
+      "summary": "根据工具返回数据，平安银行（000001）2024 年 PE（TTM）为 5.2 倍，PB 为 0.6 倍，ROE 为 11.8%。当前价格 11.23 元（演示数据）。整体估值处于较低水平，估值与基本面数据均来自工具返回的演示数据，仅供演示参考。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 6.88
+  },
+  {
+    "id": "sq-011",
+    "question": "600519 的价格和 PB 分别是多少？",
+    "passed": false,
+    "checks": [
+      true,
+      false
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "600519",
+      "name": "贵州茅台",
+      "price": "1420.50 元",
+      "financials": {
+        "PE_TTM": "23.4",
+        "PB": "7.8",
+        "ROE": "33.1%"
+      },
+      "summary": "贵州茅台（600519）当前价格 1420.50 元。2024 年财务摘要显示 PE(TTM) 23.4、PB 7.8、ROE 33.1%，估值处于白酒龙头常见区间，ROE 维持高位，盈利能力较强。注：以上为演示/回退数据，正式投资决策请以交易所及公司公告披露为准。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 6.84
+  },
+  {
+    "id": "sq-012",
+    "question": "宁德时代现在股价多少？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "300750",
+      "name": "宁德时代",
+      "price": "198.76 元（演示数据）",
+      "financials": {
+        "PE_TTM": "21.6",
+        "PB": "4.3",
+        "ROE": "21.2%"
+      },
+      "summary": "宁德时代（300750）最新价为 198.76 元。2024 年财务摘要显示：PE(TTM) 约 21.6 倍、PB 约 4.3 倍、ROE 约 21.2%，估值处于相对合理区间，盈利能力保持较强水平。以上数据为演示数据，仅供演示参考。",
+      "source": "mock-data（演示数据，回退自 Tushare）",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 6.57
+  },
+  {
+    "id": "sq-013",
+    "question": "贵州茅台现在多少钱？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "600519",
+      "name": "贵州茅台",
+      "price": "1420.50 元",
+      "financials": {
+        "PE": "23.4",
+        "PB": "7.8",
+        "ROE": "33.1%"
+      },
+      "summary": "贵州茅台（600519）当前价格为 1420.50 元。2024 年财务摘要显示：PE(TTM) 23.4、PB 7.8、ROE 33.1%，盈利能力强，估值处于相对合理区间。数据为演示数据，仅供参考。",
+      "source": "mock-data（演示数据，优先 Tushare 失败后回退）",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 7.88
+  },
+  {
+    "id": "sq-014",
+    "question": "平安银行现在多少钱？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "000001.SZ",
+      "name": "平安银行",
+      "price": "11.23 元（演示数据）",
+      "financials": {
+        "PE_TTM": "5.2",
+        "PB": "0.6",
+        "ROE": "11.8%",
+        "year": "2024"
+      },
+      "summary": "平安银行（000001.SZ）最新报价为 11.23 元。财务数据方面，2024 年估值与盈利指标显示：PE(TTM) 约 5.2 倍，PB 约 0.6 倍，ROE 约 11.8%。整体呈现低估值、低市净率的银行板块典型特征，ROE 仍保持两位数水平，但估值处于历史低位区域，需结合资产质量、净息差及宏观经济环境进一步判断其投资价值。",
+      "source": "mock-data（演示数据）",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 6.93
+  },
+  {
+    "id": "sq-015",
+    "question": "宁德时代现在多少钱？",
+    "passed": true,
+    "checks": [
+      true,
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "300750",
+      "name": "宁德时代",
+      "price": "198.76 元（演示数据）",
+      "financials": {
+        "PE_TTM": "21.6",
+        "PB": "4.3",
+        "ROE": "21.2%"
+      },
+      "summary": "宁德时代（300750）最新价 198.76 元。2024 年财务摘要显示：PE(TTM) 21.6 倍、PB 4.3 倍、ROE 21.2%。整体估值处于合理区间，盈利质量较好（ROE 超过 20%），显示公司盈利能力稳健。以上数据均为演示数据，实际行情与财务数据请以交易所及公司公告为准。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 7.27
+  },
+  {
+    "id": "sq-016",
+    "question": "600519 的 2023 年 ROE 是多少？",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "600519",
+      "name": "贵州茅台",
+      "price": "1420.50 元（演示数据）",
+      "financials": {
+        "2023": "PE=28.1, PB=9.2, ROE=32.7%（演示数据）"
+      },
+      "summary": "根据工具返回数据，贵州茅台（600519）2023 年 ROE 为 32.7%，对应 PB 9.2、PE(TTM) 28.1，显示公司盈利能力较强、净资产回报率处于较高水平。当前价格为 1420.50 元（演示数据）。注：以上为工具返回的演示数据，实际数值请以交易所及公司公告为准。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 7.44
+  },
+  {
+    "id": "sq-017",
+    "question": "300750 2024 年 PE/PB/ROE 各是多少？",
+    "passed": false,
+    "checks": [
+      false
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "300750",
+      "name": "宁德时代",
+      "price": "198.76 元",
+      "financials": {
+        "PE_TTM": "21.6",
+        "PB": "4.3",
+        "ROE": "21.2%"
+      },
+      "summary": "宁德时代（300750）2024 年财务摘要：PE（TTM）约 21.6 倍，PB 约 4.3 倍，ROE 约 21.2%。当前最新价为 198.76 元。整体看，公司 ROE 保持在 20% 以上，盈利能力较强；对应估值处于相对合理水平。数据来自工具返回结果（演示数据）。",
+      "source": "mock-data（演示数据，回退来源）",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 6.74
+  },
+  {
+    "id": "sq-018",
+    "question": "查一下 999999 现在的价格",
+    "passed": false,
+    "checks": [
+      false
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "999999",
+      "name": "未知（代码不可用）",
+      "price": null,
+      "financials": null,
+      "summary": "经查询，代码 999999 在行情/财务数据源中返回「未知代码/名称」，无法获取其当前价格及财务指标。当前可查询标的包括：600519 贵州茅台、000001 平安银行、300750 宁德时代。建议核对股票代码后重试。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 7.83
+  },
+  {
+    "id": "sq-019",
+    "question": "贵州茅台 2023 年 PE 是多少？",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "600519",
+      "name": "贵州茅台",
+      "price": "1420.50 元（演示数据）",
+      "financials": {
+        "2023": "PE=28.1, PB=9.2, ROE=32.7%（演示数据）"
+      },
+      "summary": "根据财务数据工具返回，贵州茅台（600519）2023 年 PE（TTM）为 28.1，PB 为 9.2，ROE 为 32.7%。即 2023 年贵州茅台的市盈率约为 28 倍。最新价格为 1420.50 元。数据为演示数据，请以交易所及公司公告为准。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 6.51
+  },
+  {
+    "id": "sq-020",
+    "question": "宁德时代 2023 年 PB 是多少？",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "300750",
+      "name": "宁德时代",
+      "price": "198.76 元（演示数据）",
+      "financials": {
+        "2023年": "PE=24.8, PB=5.1, ROE=20.6%（演示数据）"
+      },
+      "summary": "宁德时代（300750）2023 年市净率（PB）为 5.1，市盈率（PE_TTM）为 24.8，ROE 为 20.6%。数据来源于工具接口，仅供参考。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "不构成投资建议，数据以交易所/公司公告为准"
+    },
+    "usage": null,
+    "seconds": 6.47
+  }
+]

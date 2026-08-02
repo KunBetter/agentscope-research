@@ -110,6 +110,13 @@
 - [ ] 接入 `BudgetControlMiddleware`，记录单任务 token 成本
 - [ ] 建立首批评测集（20~50 条典型投研任务，如"某标的 PE/PB/ROE 趋势""财报数据与口径核对"）
 
+> M1 更新（2026-08-02）：保守项基本落地——评测基线 stock_qa 20/20、
+> weather 6/6（mock 模式 100%）；Tushare 收盘价 + PE_TTM/PB/ROE 查询已接入
+> （`poc/domains/stock_qa/tools.py`，带自动回退）；预算用 2.0.5 实际类名
+> `ReplyBudgetControlMiddleware`（`--budget` 开关）；权限 DEFAULT 模式验证
+> 只读工具放行、写工具默认需人工确认；schema 增加 `report_time` / `risk_note`。
+> 剩余：DuckDB K 线、AKShare 行情、真实数据模式下的评测口径。
+
 **退出条件**：Agent 能通过自定义工具准确回答 10 个预置问题（基线 > 80%）；DeepSeek formatter 兼容性确认。
 
 **备选决策点**：若此阶段发现 AgentScope 2.0.5 的 DeepSeek 接入或稳定性不满足要求，切换到备选方案（LangGraph 编排或手写编排），切换成本约 1~2 天。
@@ -165,5 +172,6 @@
 | 2026-08-01 | M0 达成 | `poc/hello-agent` 最小闭环跑通：agentscope 2.0.5 + DeepSeek v4-flash + 只读工具；token 统计正常 |
 | 2026-08-01 | 清理旧 key | 删除 `~/.zshrc` 中的旧 `DEEPSEEK_API_KEY`（备份 `.zshrc.bak`）；示例脚本改为本地 `.env` 优先 |
 | 2026-08-02 | 架构升级 | 基于 hello-agent 最小形态实现业务无关引擎三层架构（engine 引擎层 / domains 领域层 / ToolRegistry 工具注册表）；stock_qa 与 weather 两个领域包端到端跑通，11 个离线测试通过 |
+| 2026-08-02 | M1 保守项 | 评测基线（stock_qa 20/20、weather 6/6，mock 100%）、Tushare 真实数据工具（收盘价 + PE/PB/ROE，带回退）、预算中间件（ReplyBudgetControlMiddleware）、权限拒绝路径验证、schema 升级（report_time/risk_note） |
 
-**当前状态**：M0 ✅ 完成；架构升级 ✅（业务无关引擎 + 两个领域包跑通）→ 下一步 M1（真实数据工具 + 首批评测集）。
+**当前状态**：M0 ✅；架构升级 ✅；M1 保守项基本落地（评测基线 100%、Tushare 真实数据可用）→ 下一步：DuckDB K 线 / AKShare 接入、真实数据模式评测口径、M2 多 Agent。

@@ -1,0 +1,20 @@
+{"id": "sq-001", "question": "贵州茅台（600519）现在多少钱？", "check": [{"path": ["symbol"], "contains": "600519"}, {"path": ["price"], "contains": "1420.50"}]}
+{"id": "sq-002", "question": "平安银行（000001）现在多少钱？", "check": [{"path": ["symbol"], "contains": "000001"}, {"path": ["price"], "contains": "11.23"}]}
+{"id": "sq-003", "question": "宁德时代（300750）现在多少钱？", "check": [{"path": ["symbol"], "contains": "300750"}, {"path": ["price"], "contains": "198.76"}]}
+{"id": "sq-004", "question": "600519 的股价是多少？", "check": [{"path": ["symbol"], "contains": "600519"}, {"path": ["price"], "contains": "1420.50"}]}
+{"id": "sq-005", "question": "帮我查一下 000001 的最新价格", "check": [{"path": ["symbol"], "contains": "000001"}, {"path": ["price"], "contains": "11.23"}]}
+{"id": "sq-006", "question": "贵州茅台 2024 年的 ROE 是多少？", "check": [{"path": ["financials", "*"], "contains": "33.1%"}]}
+{"id": "sq-007", "question": "平安银行 2024 年财务数据（PE/PB/ROE）是多少？", "check": [{"path": ["financials", "*"], "contains": "5.2"}]}
+{"id": "sq-008", "question": "宁德时代 2023 年的 ROE 是多少？", "check": [{"path": ["financials", "*"], "contains": "20.6%"}]}
+{"id": "sq-009", "question": "贵州茅台现在多少钱？顺便看一下 2024 年 ROE。", "check": [{"path": ["symbol"], "contains": "600519"}, {"path": ["price"], "contains": "1420.50"}, {"path": ["financials", "*"], "contains": "33.1%"}]}
+{"id": "sq-010", "question": "平安银行 2024 年 PE 是多少？", "check": [{"path": ["financials", "*"], "contains": "5.2"}]}
+{"id": "sq-011", "question": "600519 的价格和 PB 分别是多少？", "check": [{"path": ["price"], "contains": "1420.50"}, {"path": ["financials", "*"], "contains": "7.8"}]}
+{"id": "sq-012", "question": "宁德时代现在股价多少？", "check": [{"path": ["symbol"], "contains": "300750"}, {"path": ["price"], "contains": "198.76"}]}
+{"id": "sq-013", "question": "贵州茅台现在多少钱？", "check": [{"path": ["symbol"], "contains": "600519"}, {"path": ["price"], "contains": "1420.50"}]}
+{"id": "sq-014", "question": "平安银行现在多少钱？", "check": [{"path": ["symbol"], "contains": "000001"}, {"path": ["price"], "contains": "11.23"}]}
+{"id": "sq-015", "question": "宁德时代现在多少钱？", "check": [{"path": ["symbol"], "contains": "300750"}, {"path": ["price"], "contains": "198.76"}]}
+{"id": "sq-016", "question": "600519 的 2023 年 ROE 是多少？", "check": [{"path": ["financials", "*"], "contains": "32.7%"}]}
+{"id": "sq-017", "question": "300750 2024 年 PE/PB/ROE 各是多少？", "check": [{"path": ["financials", "*"], "contains": "21.6"}]}
+{"id": "sq-018", "question": "查一下 999999 现在的价格", "check": [{"path": ["price"], "contains": "未知代码"}]}
+{"id": "sq-019", "question": "贵州茅台 2023 年 PE 是多少？", "check": [{"path": ["financials", "*"], "contains": "28.1"}]}
+{"id": "sq-020", "question": "宁德时代 2023 年 PB 是多少？", "check": [{"path": ["financials", "*"], "contains": "5.1"}]}

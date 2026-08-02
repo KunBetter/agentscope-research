@@ -73,12 +73,47 @@ poc/hello-agent/.venv/bin/python run_agent.py --domain weather
 
 # 自定义问题
 poc/hello-agent/.venv/bin/python run_agent.py --domain weather --question "上海天气怎么样？"
+
+# 启用单轮 token 预算（ReplyBudgetControlMiddleware）
+poc/hello-agent/.venv/bin/python run_agent.py --domain stock_qa --budget 6000
 ```
 
 API Key 加载优先级：`poc/.env` > `poc/hello-agent/.env` > `~/git/StockRec/.env`
 > 环境变量（复制 `.env.example` 为 `.env` 即可）。
 
-## 4. 测试（离线，不调用模型）
+## 4. 评测基线（保守优先：先量化，再改进）
+
+```bash
+# 跑 stock_qa 基线（20 条，mock 模式：确定性，可精确打分）
+poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain stock_qa
+
+# 跑 weather 基线（6 条）
+poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain weather
+
+# 只跑前 N 条 / 自定义任务集 / 真实数据模式（不计分，仅观察）
+poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain stock_qa --limit 3
+poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain stock_qa --real
+```
+
+当前基线（2026-08-02，mock 模式）：**stock_qa 20/20（100%）**、**weather 6/6（100%）**。
+结果明细落在 `poc/eval/results/`；退出码在通过率低于阈值（默认 0.8）时为 1。
+检查项支持字段路径（`["financials", "*"]` 遍历 dict 值）与 `any_of`
+（容忍 LLM 对错误场景的不同措辞，如"未知代码/不存在/无法获取"）。
+
+## 5. 数据源策略（真实数据 + 自动回退）
+
+stock_qa 工具按三级降级取数，**引擎与领域包结构不变**：
+
+1. 强制 mock：`STOCK_TOOLS_MOCK=1`（评测基线默认，保证确定性）；
+2. Tushare 真实数据：已安装 `tushare` 且配置 `TUSHARE_TOKEN` 时优先
+   （收盘价 `daily`、PE_TTM/PB `daily_basic`、ROE `fina_indicator`）；
+3. 自动回退：无依赖 / 无 token / 网络异常时回退演示数据并在结果标注。
+
+已验证（2026-08-02）：600519 收盘价 1350.60（Tushare 20260731）、
+2024 PE_TTM=20.41 / PB=6.23 / ROE=38.43%；未知代码优雅提示可用标的。
+剩余 M1 数据源（DuckDB K 线、AKShare 行情）只需在 `tools.py` 内继续扩展。
+
+## 6. 测试（离线，不调用模型）
 
 ```bash
 poc/hello-agent/.venv/bin/pip install pytest
@@ -86,9 +121,10 @@ cd poc && ../poc/hello-agent/.venv/bin/python -m pytest tests -q
 ```
 
 覆盖：工具注册（函数式 / 装饰器 / 分组 / 只读标记）、领域包契约、引擎装配
-（两个领域各自的工具与 schema，不共享状态）。
+（两个领域各自的工具与 schema，不共享状态）、预算中间件装配、权限判定
+（DEFAULT 模式：只读工具 ALLOW / 写工具默认需人工确认）。
 
-## 5. 新增一个业务领域（三步）
+## 7. 新增一个业务领域（三步）
 
 1. 新建 `domains/<业务名>/` 包，实现 `tools.py`（普通函数）、`prompts.py`、
    `schemas.py`（Pydantic 模型）、`domain.py`（`DomainPackage` 子类）；
@@ -98,9 +134,12 @@ cd poc && ../poc/hello-agent/.venv/bin/python -m pytest tests -q
 
 之后 `--domain <业务名>` 即可运行，引擎与工具注册表零改动。
 
-## 6. 当前边界与下一步
+## 8. 当前边界与下一步
 
-- 演示数据：两个领域的工具目前都是 mock，替换真实数据源（Tushare /
-  DuckDB / AKShare）只改 `domains/<业务>/tools.py`；
+- 数据源：stock_qa 已接入 Tushare（收盘价 + PE_TTM/PB/ROE，带自动回退）；
+  DuckDB K 线 / AKShare 待接入；weather 仍为演示数据——换真实源只需改
+  `domains/<业务>/tools.py`；
 - 单 Agent 单轮：多 Agent 链路（规划 M2）将在领域包契约上扩展
-  pipeline 拓扑出口，引擎层负责编排，业务层继续只提供内容。
+  pipeline 拓扑出口，引擎层负责编排，业务层继续只提供内容；
+- 真实数据模式下的评测：mock 基线确定后可跑 `--real` 观察真实取值，
+  需要把评测集的期望值改为区间/口径断言后再计分。

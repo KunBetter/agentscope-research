@@ -1,0 +1,26 @@
+[
+  {
+    "id": "w-006",
+    "question": "东京天气怎么样？",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "city": "东京",
+      "condition": "未知（该城市不在可用数据范围内）",
+      "temperature": "未知",
+      "wind": "未知",
+      "summary": "无法获取东京的天气数据，当前系统仅支持北京、上海、广州三个城市。",
+      "source": "mock-data",
+      "disclaimer": "演示数据，仅作架构验证",
+      "report_time": "2026-08-02"
+    },
+    "usage": {
+      "input": 1898,
+      "output": 383
+    },
+    "seconds": 5.8
+  }
+]

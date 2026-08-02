@@ -1,0 +1,29 @@
+[
+  {
+    "id": "sq-018",
+    "question": "查一下 999999 现在的价格",
+    "passed": true,
+    "checks": [
+      true
+    ],
+    "text": "The required structured output is generated.",
+    "structured": {
+      "symbol": "999999",
+      "name": "未知代码（数据源不可用）",
+      "price": "未返回（工具提示：未知代码/名称 999999）",
+      "financials": {
+        "2024": "暂无可查财务数据"
+      },
+      "summary": "查询代码 999999 时，行情与财务工具均返回\"未知代码/名称\"。当前数据源可用的标的仅包括：600519 贵州茅台、000001 平安银行、300750 宁德时代。999999 不在可用列表内，无法获取价格与财务指标，建议核对代码后重试。",
+      "source": "mock-data（Tushare 不可用时的回退演示数据）",
+      "disclaimer": "演示数据，不构成投资建议",
+      "report_time": "2026-08-02",
+      "risk_note": "代码可能输入有误或不在数据源覆盖范围，请以交易所/公司公告为准"
+    },
+    "usage": {
+      "input": 4696,
+      "output": 936
+    },
+    "seconds": 11.19
+  }
+]

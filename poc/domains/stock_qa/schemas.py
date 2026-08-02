@@ -19,3 +19,10 @@ class StockReport(BaseModel):
         default="演示数据，不构成投资建议",
         description="免责声明",
     )
+    report_time: str = Field(
+        description="报告生成时间（YYYY-MM-DD）",
+    )
+    risk_note: str = Field(
+        default="不构成投资建议，数据以交易所/公司公告为准",
+        description="风险提示",
+    )
