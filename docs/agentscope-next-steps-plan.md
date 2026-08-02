@@ -81,6 +81,8 @@
 
 用到的 AgentScope 能力：`ReActAgent` + 自定义 Tool 注册、`Pipeline`/Agent Team 编排、权限系统（只读模式）、结构化输出、长期记忆、预算控制、事件系统 + WebUI/Studio。
 
+**架构落地状态（2026-08-02）**：单 Agent 骨架已按三层实现——`poc/engine/`（业务无关引擎：`DomainPackage` 契约、`ToolRegistry` 工具注册表、`AgentEngine` 装配）、`poc/domains/`（业务领域包：`stock_qa` / `weather`，各自 tools + prompts + schemas）、`poc/run_agent.py`（CLI 入口）。两个领域包均已端到端跑通（工具调用 + 结构化输出），11 个离线测试通过；详见 [poc/README.md](../poc/README.md)。M1 只需在 `stock_qa` 领域包内把 mock 工具替换为 Tushare/DuckDB/AKShare 真实实现，引擎与领域包结构不变。
+
 ---
 
 ## 4. 里程碑与时间盒
@@ -162,5 +164,6 @@
 | 2026-08-01 | 确定规划 | 主攻方向 2（金融投研多智能体），先跑最小场景再逐步加复杂度 |
 | 2026-08-01 | M0 达成 | `poc/hello-agent` 最小闭环跑通：agentscope 2.0.5 + DeepSeek v4-flash + 只读工具；token 统计正常 |
 | 2026-08-01 | 清理旧 key | 删除 `~/.zshrc` 中的旧 `DEEPSEEK_API_KEY`（备份 `.zshrc.bak`）；示例脚本改为本地 `.env` 优先 |
+| 2026-08-02 | 架构升级 | 基于 hello-agent 最小形态实现业务无关引擎三层架构（engine 引擎层 / domains 领域层 / ToolRegistry 工具注册表）；stock_qa 与 weather 两个领域包端到端跑通，11 个离线测试通过 |
 
-**当前状态**：M0 ✅ 完成 → 下一步 M1（真实数据工具 + 首批评测集）。
+**当前状态**：M0 ✅ 完成；架构升级 ✅（业务无关引擎 + 两个领域包跑通）→ 下一步 M1（真实数据工具 + 首批评测集）。

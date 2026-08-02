@@ -8,12 +8,14 @@
 | [AgentScope 可行性应用方向脑暴](docs/agentscope-applications-brainstorm.md) | 12 个应用方向及可行性分析、优先级矩阵、落地路线建议 |
 | [AgentScope 后续规划](docs/agentscope-next-steps-plan.md) | 方向决策（主攻金融投研多智能体）、POC 架构、里程碑与退出条件、风险清单 |
 | [Hello Agent 示例技术方案](docs/agentscope-hello-agent-example.md) | 最小闭环的技术架构、代码走读、使用说明、验证结论与踩坑记录 |
+| [业务无关 Agent 引擎架构](poc/README.md) | 引擎层 / 业务领域层 / 工具注册表的分层设计、实现与使用说明 |
 
 ## POC
 
 | 目录 | 内容 | 状态 |
 | --- | --- | --- |
 | [poc/hello-agent](poc/hello-agent/) | 最小场景：单 Agent + DeepSeek v4-flash + 只读工具闭环 | ✅ 跑通（2026-08-01） |
+| [poc/](poc/) | 业务无关引擎三层架构：engine 引擎层 + domains 领域包 + 工具注册表 | ✅ 跑通（2026-08-02） |
 
 ## 进展日志
 
@@ -22,6 +24,7 @@
 | 2026-08-01 | 完成 AgentScope 技术调研与 12 方向脑暴 |
 | 2026-08-01 | 确定规划：主攻金融投研多智能体，先跑最小场景 |
 | 2026-08-01 | 最小场景跑通（agentscope 2.0.5 + DeepSeek v4-flash + 只读工具）；清理 zshrc 旧 key |
+| 2026-08-02 | 架构升级：基于最小形态实现业务无关 Agent 引擎（engine/）+ 业务领域层（domains/，stock_qa、weather）+ 工具注册表；11 个离线测试与两个领域端到端验证通过 |
 
 **调研时间**：2026-08-01（信息以截至当日的公开资料为准）
 

@@ -2,6 +2,9 @@
 
 > 对应代码：`poc/hello-agent/` ｜ 状态：✅ 已跑通（2026-08-01）
 > 定位：AgentScope 2.0 的**最小可行闭环**，是后续金融投研多智能体的验证底座。
+>
+> 2026-08-02 更新：基于本示例的架构升级已落地到 [poc/](../poc/README.md)
+> （engine 引擎层 + domains 领域层 + 工具注册表），本示例保留为最小基线。
 
 ---
 
@@ -176,11 +179,13 @@ cd poc/hello-agent
 
 ## 7. 扩展路径（下一步）
 
-保持本示例结构不变，只替换工具实现即可接入真实数据：
+> 2026-08-02：架构已升级为"引擎层 + 业务领域层 + 工具注册表"三层
+> （见 [poc/README.md](../poc/README.md)），本示例保留为最小基线。
+> 后续接入真实数据在 `poc/domains/stock_qa/tools.py` 内替换实现即可。
 
-1. **替换为真实数据源**：`get_stock_price` → Tushare 实时行情 / DuckDB K 线查询（复用 StockRec 的 token 与连接）；
-2. **补充财务工具**：PE/PB/ROE、财务摘要查询，对应规划 M1；
+1. **替换为真实数据源**：`get_stock_price` / `get_stock_financials` → Tushare 实时行情 / DuckDB K 线查询（复用 StockRec 的 token 与连接）；
+2. **补充财务工具**：在 stock_qa 领域包继续注册 PE/PB/ROE 等查询工具，对应规划 M1；
 3. **权限强化**：数据工具保持只读，命令工具默认拒绝；
-4. **多 Agent**：在 M2 阶段增加"分析 Agent + 风控复核 Agent"，复用本示例的 Agent/Toolkit 模式。
+4. **多 Agent**：在 M2 阶段增加"分析 Agent + 风控复核 Agent"，复用 engine/domains 的分层模式。
 
 关联规划见 [AgentScope 后续规划](agentscope-next-steps-plan.md)。
