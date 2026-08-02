@@ -52,6 +52,8 @@ class EngineConfig:
     """回退模型名简写（同凭据构建，转成 ModelConfig.fallback_model）。"""
     write_confirmation: str = "deny"
     """写工具人工确认策略：``deny`` 默认拒绝，``confirm`` 自动确认。"""
+    memory_dir: str | None = None
+    """文件型长期记忆目录；None 表示不启用（AgenticMemoryMiddleware）。"""
 
     def __post_init__(self) -> None:
         self.env_files = tuple(Path(p) for p in self.env_files)
@@ -111,9 +113,31 @@ class AgentEngine:
             )
         self.registry = ToolRegistry()
         domain.register_tools(self.registry)
-        self.toolkit = self.registry.build_toolkit()
+        self.memory_root: Path | None = None
+        self._memory_middleware = None
+        self._memory_tools: list = []
+        self._prepare_memory()
+        self.toolkit = self.registry.build_toolkit(
+            extra_tools=self._memory_tools,
+        )
         self.model = self._build_model()
         self.agent = self._build_agent()
+
+    def _prepare_memory(self) -> None:
+        """启用文件型长期记忆：建目录、装配中间件与受控读写工具。"""
+        if not self.config.memory_dir:
+            return
+        memory_root = Path(self.config.memory_dir)
+        memory_root.mkdir(parents=True, exist_ok=True)
+        self.memory_root = memory_root
+        from agentscope.middleware import AgenticMemoryMiddleware
+        from agentscope.tool import Read, Write
+
+        self._memory_middleware = AgenticMemoryMiddleware(
+            workdir=str(memory_root),
+            memory_dir="Memory",
+        )
+        self._memory_tools = [Read(), Write()]
 
     def _build_agent(self) -> Agent:
         middlewares: list = []
@@ -125,7 +149,9 @@ class AgentEngine:
                     token_budget=self.config.token_budget,
                 ),
             )
-        return Agent(
+        if self._memory_middleware is not None:
+            middlewares.append(self._memory_middleware)
+        agent = Agent(
             name=self.domain.name,
             system_prompt=self.domain.system_prompt,
             model=self.model,
@@ -135,6 +161,25 @@ class AgentEngine:
             injection_config=self.config.injection_config,
             model_config=self._model_config,
         )
+        if self.memory_root is not None:
+            # 允许 Write 工具只写记忆目录（其余写操作仍按默认策略）
+            from agentscope.permission import (
+                PermissionBehavior,
+                PermissionRule,
+            )
+
+            agent.state.permission_context.allow_rules.setdefault(
+                "Write",
+                [],
+            ).append(
+                PermissionRule(
+                    tool_name="Write",
+                    rule_content=f"{self.memory_root}/**",
+                    behavior=PermissionBehavior.ALLOW,
+                    source="engine-memory",
+                ),
+            )
+        return agent
 
     def reset(self) -> None:
         """开启全新会话：重建 Agent（新 AgentState），模型与工具不变。"""

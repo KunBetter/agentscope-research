@@ -92,6 +92,9 @@ poc/hello-agent/.venv/bin/python run_agent.py --domain stock_qa --max-retries 2 
 # HITL 写工具确认流演示（todo 领域：deny 拒绝 / confirm 自动确认）
 poc/hello-agent/.venv/bin/python poc/run_hitl_demo.py
 poc/hello-agent/.venv/bin/python poc/run_hitl_demo.py --confirm
+
+# 文件型长期记忆演示（跨会话持久化；--reset 清空记忆）
+poc/hello-agent/.venv/bin/python poc/run_memory_demo.py --reset
 ```
 
 一键离线验证（测试 + 装配冒烟，不调用模型）：
@@ -178,12 +181,16 @@ cd poc && ../poc/hello-agent/.venv/bin/python -m pytest tests -q
   confirm 时执行（两分支均已端到端验证）；
 - 领域插拔：第三个领域包 todo（含写工具）已接入，引擎零改动；
 - 短期记忆：已验证同一引擎多轮连续 run 保留上下文（多轮会话演示）；
-  长期记忆（跨会话持久化）属规划 M2，未接入；
+  长期记忆：文件型已接入（`--memory-dir` 启用 `AgenticMemoryMiddleware`
+  + 受控 Read/Write 工具，Write 仅允许写入记忆目录），跨会话取回验证通过；
 - 上下文管理：压缩阈值/保留比已可通过 `EngineConfig.context_config`
   或 CLI `--context-trigger-ratio / --context-reserve-ratio` 配置；
 - 已知限制：上下文压缩触发后，结构化输出生成在 agentscope 2.0.5 +
-  DeepSeek 组合下不稳定（`--compression-demo` 可复现：压缩日志出现后
-  下一轮结构化输出失败）；默认压缩阈值（0.8）下正常对话不受影响，
-  该问题待升级版本或换结构化输出路径时验证；
+  DeepSeek 组合下**间歇性**不稳定（`--compression-demo`：压缩日志出现后，
+  下一轮结构化输出可能失败；复验一次触发两次压缩未见失败）；默认压缩
+  阈值（0.8）下正常对话不受影响；
+- 版本复核（2026-08-02）：`pip index versions agentscope` 显示 **PyPI
+  最新仍为 2.0.5**，暂无升级目标；官方评测模块在 2.0.5 中缺失的结论
+  维持，待新版本发布后复验；
 - 单 Agent 单轮：多 Agent 链路（规划 M2）将在领域包契约上扩展
   pipeline 拓扑出口，引擎层负责编排，业务层继续只提供内容。

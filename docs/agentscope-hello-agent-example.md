@@ -57,7 +57,7 @@
 
 ### 2.2 关键设计决策
 
-1. **锁版本**：`agentscope==2.0.5`，独立 venv（Python 3.12），避免系统 Python 3.14 的兼容风险。
+1. **锁版本**：`agentscope==2.0.5`，独立 venv（Python 3.12），避免系统 Python 3.14 的兼容风险。（2026-08-02 复核：2.0.5 为 PyPI 最新版，暂无升级目标。）
 2. **模型固定**：`deepseek-v4-flash` + 官方 base_url，减少变量。
 3. **工具只读**：`FunctionTool(..., is_read_only=True)` 显式声明工具无副作用，这是后续权限系统（允许/拒绝/人工确认）的最小前置实践。
 4. **API Key 优先级**：本地 `.env` > 环境变量回退链。之所以本地优先，是因为 shell 里 export 的旧 key 会静默覆盖 `.env`（见 §6 踩坑记录）。

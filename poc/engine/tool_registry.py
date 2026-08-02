@@ -95,8 +95,15 @@ class ToolRegistry:
     # ------------------------------------------------------------------
     # 构建
     # ------------------------------------------------------------------
-    def build_toolkit(self) -> Toolkit:
-        """把注册声明转换为 AgentScope Toolkit（按工具组分组）。"""
+    def build_toolkit(
+        self,
+        extra_tools: list | None = None,
+    ) -> Toolkit:
+        """把注册声明转换为 AgentScope Toolkit（按工具组分组）。
+
+        ``extra_tools`` 用于注入引擎级工具（如长期记忆所需的 Read/Write），
+        挂到 basic 组。
+        """
         groups: dict[str, list[FunctionTool]] = {}
         for spec in self._specs:
             tool = FunctionTool(
@@ -109,6 +116,8 @@ class ToolRegistry:
             groups.setdefault(spec.group, []).append(tool)
 
         basic_tools = groups.pop("basic", None)
+        if extra_tools:
+            basic_tools = list(basic_tools or []) + list(extra_tools)
         tool_groups = []
         for group_name, tools in groups.items():
             desc = next(

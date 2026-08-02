@@ -86,6 +86,11 @@ def build_parser() -> argparse.ArgumentParser:
         default="deny",
         help="写工具人工确认策略：deny 默认拒绝 / confirm 自动确认",
     )
+    parser.add_argument(
+        "--memory-dir",
+        default=None,
+        help="文件型长期记忆目录（启用 AgenticMemoryMiddleware）",
+    )
     return parser
 
 
@@ -128,6 +133,7 @@ def main() -> int:
             max_retries=args.max_retries,
             fallback_model=args.fallback_model,
             write_confirmation=args.write_confirmation,
+            memory_dir=args.memory_dir,
         ),
     )
 

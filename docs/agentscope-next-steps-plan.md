@@ -178,5 +178,6 @@
 | 2026-08-02 | 保守功能批次 | 模型重试/回退（`--max-retries`/`--fallback-model`，`ModelConfig` 透传）；工具并行调用验证（事件记录 + `*` 标记）；评测集扩充至 stock_qa 30 / weather 10（100%）；`verify.sh` 一键离线验证；`--baseline` 评测 diff；工具调用事件摘要 |
 | 2026-08-02 | 阶段 3 | HITL 写工具确认流：`EngineConfig.write_confirmation`（deny/confirm），todo 领域 `add_todo` 触发 `RequireUserConfirmEvent`，两分支端到端验证；第三个领域包 todo（只读 + 写工具）接入，引擎零改动；todo 评测 5/5；修复评测 `*` 通配符在列表上的查找 bug |
 | 2026-08-02 | 阶段 4（官方评测验证） | 验证结论：`agentscope==2.0.5` 安装包无评测模块（子模块/导出均无 eval），官方 Evaluation API 对比接入不可行；保守替代：自建评测新增 `--all` 跨领域汇总。全量 45 条一次汇总 43/45（95.6%），两条失败为检查词表未覆盖 LLM 措辞变体，已修复并单独验证 |
+| 2026-08-02 | 长期记忆 + 版本复核 | 文件型长期记忆接入：`--memory-dir` 启用 `AgenticMemoryMiddleware` + 受控 Read/Write 工具（Write 仅允许写记忆目录），跨会话取回端到端验证通过。版本复核：`pip index versions agentscope` 显示最新仍为 2.0.5，暂无升级目标；压缩后结构化输出不稳定为间歇性（复验触发两次压缩未见失败），官方评测模块缺失结论维持 |
 
-**当前状态**：M0 ✅；架构升级 ✅；开发列表非多 Agent 项全部落地（阶段 1~3 + 官方评测验证结论）→ 多 Agent 按需再评估；真实数据源按需再接入。
+**当前状态**：M0 ✅；架构升级 ✅；开发列表非多 Agent 项全部落地；文件型长期记忆接入并通过跨会话验证；版本复核：2.0.5 为 PyPI 最新（升级路径暂无目标）→ 待新版本发布后复验压缩/评测模块；多 Agent 与真实数据源按需再评估。
