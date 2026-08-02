@@ -6,8 +6,8 @@
     .venv/bin/python run_agent.py --domain stock_qa
     .venv/bin/python run_agent.py --domain weather --question "北京天气怎么样？"
 
-API Key 加载优先级：poc/.env > poc/hello-agent/.env > ~/git/StockRec/.env
-> 环境变量（与 hello_agent 保持一致，本地 .env 优先）。
+API Key 加载优先级：poc/.env > poc/hello-agent/.env > 环境变量
+（与 hello_agent 保持一致，本地 .env 优先）。
 """
 
 from __future__ import annotations
@@ -21,7 +21,6 @@ from engine.agent_engine import AgentEngine, EngineConfig
 DEFAULT_ENV_FILES = [
     Path(__file__).parent / ".env",
     Path(__file__).parent / "hello-agent" / ".env",
-    Path.home() / "git" / "StockRec" / ".env",
 ]
 
 DEFAULT_QUESTIONS = {

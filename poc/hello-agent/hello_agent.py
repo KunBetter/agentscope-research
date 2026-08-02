@@ -11,7 +11,6 @@
 API Key 来源（按顺序）：
   1. 环境变量 DEEPSEEK_API_KEY；
   2. 本目录 .env；
-  3. ~/git/StockRec/.env（与既有系统复用同一把 key）。
 """
 
 import asyncio
@@ -26,11 +25,9 @@ from agentscope.message import UserMsg
 from agentscope.model import DeepSeekChatModel
 from agentscope.tool import FunctionTool, Toolkit
 
-# 与 StockRec 保持一致（config.yaml: model: "deepseek-v4-flash"）
 DEEPSEEK_MODEL = "deepseek-v4-flash"
 FALLBACK_ENV_PATHS = [
     Path(__file__).parent / ".env",
-    Path.home() / "git" / "StockRec" / ".env",
 ]
 
 
@@ -48,7 +45,7 @@ def get_stock_price(symbol: str) -> str:
 
 
 def _load_api_key() -> str:
-    # 本地 .env 优先（避免 shell 中 export 的旧 key 覆盖）；缺失时回退 StockRec
+    # 本地 .env 优先（避免 shell 中 export 的旧 key 覆盖）
     env_path = Path(__file__).parent / ".env"
     if env_path.exists():
         load_dotenv(env_path, override=True)

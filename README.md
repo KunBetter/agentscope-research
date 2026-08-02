@@ -26,6 +26,7 @@
 | 2026-08-01 | 最小场景跑通（agentscope 2.0.5 + DeepSeek v4-flash + 只读工具）；清理 zshrc 旧 key |
 | 2026-08-02 | 架构升级：基于最小形态实现业务无关 Agent 引擎（engine/）+ 业务领域层（domains/，stock_qa、weather）+ 工具注册表；11 个离线测试与两个领域端到端验证通过 |
 | 2026-08-02 | M1 保守项：评测基线（stock_qa 20/20、weather 6/6）、Tushare 真实数据工具（带 mock 回退）、预算中间件、权限验证、schema 升级 |
+| 2026-08-02 | 解耦调整：数据层与 StockRec 解耦，全部改用确定性 mock（移除 Tushare/DuckDB/AKShare 接入与真实评测模式），保持 Agent 能力简单、可复现 |
 
 **调研时间**：2026-08-01（信息以截至当日的公开资料为准）
 

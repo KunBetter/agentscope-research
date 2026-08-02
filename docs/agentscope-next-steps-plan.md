@@ -72,7 +72,7 @@
 ```
 用户提问
   → 规划 Agent（拆分任务、确定所需数据）
-  → 数据收集 Agent（工具：Tushare 财务/资金流、DuckDB K线、AKShare 行情）[只读权限]
+  → 数据收集 Agent（工具：行情/财务查询，当前 mock 数据源）[只读权限]
   → 分析 Agent（财报解读、因子归因、趋势判断，输出带引用的分析）
   → 风控复核 Agent（校验数据口径、质疑幻觉、检查结论与数据一致性）
   → 结构化输出（研报 JSON Schema，含数据来源与引用）
@@ -81,7 +81,7 @@
 
 用到的 AgentScope 能力：`ReActAgent` + 自定义 Tool 注册、`Pipeline`/Agent Team 编排、权限系统（只读模式）、结构化输出、长期记忆、预算控制、事件系统 + WebUI/Studio。
 
-**架构落地状态（2026-08-02）**：单 Agent 骨架已按三层实现——`poc/engine/`（业务无关引擎：`DomainPackage` 契约、`ToolRegistry` 工具注册表、`AgentEngine` 装配）、`poc/domains/`（业务领域包：`stock_qa` / `weather`，各自 tools + prompts + schemas）、`poc/run_agent.py`（CLI 入口）。两个领域包均已端到端跑通（工具调用 + 结构化输出），11 个离线测试通过；详见 [poc/README.md](../poc/README.md)。M1 只需在 `stock_qa` 领域包内把 mock 工具替换为 Tushare/DuckDB/AKShare 真实实现，引擎与领域包结构不变。
+**架构落地状态（2026-08-02）**：单 Agent 骨架已按三层实现——`poc/engine/`（业务无关引擎：`DomainPackage` 契约、`ToolRegistry` 工具注册表、`AgentEngine` 装配）、`poc/domains/`（业务领域包：`stock_qa` / `weather`，各自 tools + prompts + schemas）、`poc/run_agent.py`（CLI 入口）。两个领域包均已端到端跑通（工具调用 + 结构化输出），详见 [poc/README.md](../poc/README.md)。**数据层与 StockRec 解耦**：当前全部使用确定性 mock（移除 Tushare/DuckDB/AKShare 接入），引擎与领域包结构不变，后续按需再接入真实数据源。
 
 ---
 
@@ -104,18 +104,18 @@
 
 ### M1（第 1~2 周）：单 Agent 数据问答验证
 
-- [ ] 自定义 Tool：Tushare 财务查询、DuckDB K 线查询、AKShare 实时行情查询
+- [x] 自定义 Tool（mock 演示数据）：`get_stock_price` / `get_stock_financials`（数据层与外部数据源解耦，真实数据源按需再接入）
 - [ ] 配置权限：数据工具只读，命令/写文件工具默认拒绝
 - [ ] 验证结构化输出（研报 JSON Schema，v2.0.5）
 - [ ] 接入 `BudgetControlMiddleware`，记录单任务 token 成本
 - [ ] 建立首批评测集（20~50 条典型投研任务，如"某标的 PE/PB/ROE 趋势""财报数据与口径核对"）
 
 > M1 更新（2026-08-02）：保守项基本落地——评测基线 stock_qa 20/20、
-> weather 6/6（mock 模式 100%）；Tushare 收盘价 + PE_TTM/PB/ROE 查询已接入
-> （`poc/domains/stock_qa/tools.py`，带自动回退）；预算用 2.0.5 实际类名
+> weather 6/6（mock 模式 100%）；预算用 2.0.5 实际类名
 > `ReplyBudgetControlMiddleware`（`--budget` 开关）；权限 DEFAULT 模式验证
 > 只读工具放行、写工具默认需人工确认；schema 增加 `report_time` / `risk_note`。
-> 剩余：DuckDB K 线、AKShare 行情、真实数据模式下的评测口径。
+> 方向调整：数据层与 StockRec 解耦，全部使用确定性 mock（移除
+> Tushare/DuckDB/AKShare 接入与真实评测模式），真实数据源按需再接入。
 
 **退出条件**：Agent 能通过自定义工具准确回答 10 个预置问题（基线 > 80%）；DeepSeek formatter 兼容性确认。
 
@@ -133,7 +133,7 @@
 ### M3（第 5~6 周）：评测与集成决策
 
 - [ ] 用评测集对比：多 Agent 链路 vs 现有 `analyze_growth_potential.py` 单次分析
-- [ ] 评估集成方式：独立服务（Agent Service）或接入 StockRec 周度流程
+- [ ] 评估集成方式：独立服务（Agent Service）或与现有业务系统集成（待定）
 - [ ] 沉淀模板与中间件（审计日志、预算、只读策略）
 - [ ] 输出集成方案文档
 
@@ -159,7 +159,7 @@
 1. **今天**：确认本规划（特别是方向选择），创建 POC 目录/仓库；
 2. **本周**：安装 `agentscope==2.0.5` 独立环境，跑通 Quickstart + DeepSeek 接入；
 3. **下周起**：按 M1 → M2 → M3 推进，每个里程碑有明确退出条件；
-4. **M3 后**：根据评测结果决定是否集成进 StockRec 周度自动化，以及是否启动方向 1（RAG 知识库）。
+4. **M3 后**：根据评测结果决定集成方式，以及是否启动方向 1（RAG 知识库）。
 
 ---
 
@@ -173,5 +173,6 @@
 | 2026-08-01 | 清理旧 key | 删除 `~/.zshrc` 中的旧 `DEEPSEEK_API_KEY`（备份 `.zshrc.bak`）；示例脚本改为本地 `.env` 优先 |
 | 2026-08-02 | 架构升级 | 基于 hello-agent 最小形态实现业务无关引擎三层架构（engine 引擎层 / domains 领域层 / ToolRegistry 工具注册表）；stock_qa 与 weather 两个领域包端到端跑通，11 个离线测试通过 |
 | 2026-08-02 | M1 保守项 | 评测基线（stock_qa 20/20、weather 6/6，mock 100%）、Tushare 真实数据工具（收盘价 + PE/PB/ROE，带回退）、预算中间件（ReplyBudgetControlMiddleware）、权限拒绝路径验证、schema 升级（report_time/risk_note） |
+| 2026-08-02 | 解耦调整 | 数据层与 StockRec 解耦：移除 Tushare/DuckDB/AKShare 接入与真实评测模式，全部改用确定性 mock；卸载相关依赖；更新文档 |
 
-**当前状态**：M0 ✅；架构升级 ✅；M1 保守项基本落地（评测基线 100%、Tushare 真实数据可用）→ 下一步：DuckDB K 线 / AKShare 接入、真实数据模式评测口径、M2 多 Agent。
+**当前状态**：M0 ✅；架构升级 ✅；M1 保守项落地（评测基线 100%，数据层为确定性 mock，与 StockRec 解耦）→ 下一步：M2 多 Agent，或按需再接入真实数据源。

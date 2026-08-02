@@ -57,8 +57,8 @@
 
 ### 2.2 关键设计决策
 
-1. **锁版本**：`agentscope==2.0.5`，独立 venv（Python 3.12），与 StockRec 同版本运行时，避免系统 Python 3.14 的兼容风险。
-2. **模型与存量系统一致**：`deepseek-v4-flash` + 官方 base_url，与 StockRec `config.yaml` 保持一致，减少变量。
+1. **锁版本**：`agentscope==2.0.5`，独立 venv（Python 3.12），避免系统 Python 3.14 的兼容风险。
+2. **模型固定**：`deepseek-v4-flash` + 官方 base_url，减少变量。
 3. **工具只读**：`FunctionTool(..., is_read_only=True)` 显式声明工具无副作用，这是后续权限系统（允许/拒绝/人工确认）的最小前置实践。
 4. **API Key 优先级**：本地 `.env` > 环境变量回退链。之所以本地优先，是因为 shell 里 export 的旧 key 会静默覆盖 `.env`（见 §6 踩坑记录）。
 
@@ -131,7 +131,6 @@ cd poc/hello-agent
 
 1. `poc/hello-agent/.env`（推荐，本示例中优先）；
 2. 环境变量 `DEEPSEEK_API_KEY`；
-3. 回退 `~/git/StockRec/.env`。
 
 ### 4.4 预期输出
 
@@ -172,7 +171,7 @@ cd poc/hello-agent
 ## 6. 踩坑记录
 
 1. **旧 key 静默覆盖**：`~/.zshrc` 中 export 的旧 `DEEPSEEK_API_KEY` 优先级高于 `.env`，导致本地新 key 不生效、连续 401。已通过"本地 `.env` 优先 + `override=True`"解决，旧 key 已从 zshrc 删除（备份 `~/.zshrc.bak`）。
-2. **系统 Python 3.14**：默认 `python3` 为 3.14，为与 StockRec 及 AgentScope 兼容性对齐，统一用 Python 3.12 建 venv。
+2. **系统 Python 3.14**：默认 `python3` 为 3.14，为与 AgentScope 兼容性对齐，统一用 Python 3.12 建 venv。
 3. **pip 网络受限**：沙箱内无法解析 PyPI，安装需在沙箱外执行（已批准）。
 
 ---
@@ -183,7 +182,7 @@ cd poc/hello-agent
 > （见 [poc/README.md](../poc/README.md)），本示例保留为最小基线。
 > 后续接入真实数据在 `poc/domains/stock_qa/tools.py` 内替换实现即可。
 
-1. **替换为真实数据源**：`get_stock_price` / `get_stock_financials` → Tushare 实时行情 / DuckDB K 线查询（复用 StockRec 的 token 与连接）；
+1. **数据层当前为确定性 mock**（与外部数据源解耦）：后续接真实数据时替换 `poc/domains/stock_qa/tools.py` 内部实现即可；
 2. **补充财务工具**：在 stock_qa 领域包继续注册 PE/PB/ROE 等查询工具，对应规划 M1；
 3. **权限强化**：数据工具保持只读，命令工具默认拒绝；
 4. **多 Agent**：在 M2 阶段增加"分析 Agent + 风控复核 Agent"，复用 engine/domains 的分层模式。
