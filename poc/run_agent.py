@@ -26,6 +26,7 @@ DEFAULT_ENV_FILES = [
 DEFAULT_QUESTIONS = {
     "stock_qa": "贵州茅台（600519）现在多少钱？顺便看一下它的 ROE。",
     "weather": "北京今天天气怎么样？",
+    "todo": "现在有哪些待办？",
 }
 
 
@@ -79,6 +80,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="回退模型名（同凭据构建，如 deepseek-v4-pro）",
     )
+    parser.add_argument(
+        "--write-confirmation",
+        choices=["deny", "confirm"],
+        default="deny",
+        help="写工具人工确认策略：deny 默认拒绝 / confirm 自动确认",
+    )
     return parser
 
 
@@ -120,6 +127,7 @@ def main() -> int:
             context_config=context_config,
             max_retries=args.max_retries,
             fallback_model=args.fallback_model,
+            write_confirmation=args.write_confirmation,
         ),
     )
 

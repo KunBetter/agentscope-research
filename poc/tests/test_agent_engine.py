@@ -36,3 +36,25 @@ def test_engine_has_no_shared_state_between_domains() -> None:
     weather = _build_engine("weather")
     assert set(stock.registry.tool_names) != set(weather.registry.tool_names)
     assert stock.agent is not weather.agent
+
+
+def test_write_confirmation_default_deny() -> None:
+    os.environ["DEEPSEEK_API_KEY"] = "test-key"
+    engine = AgentEngine(
+        load_domain("todo"),
+        EngineConfig(env_files=()),
+    )
+    assert engine.config.write_confirmation == "deny"
+
+
+def test_write_confirmation_invalid_value_rejected() -> None:
+    os.environ["DEEPSEEK_API_KEY"] = "test-key"
+    try:
+        AgentEngine(
+            load_domain("todo"),
+            EngineConfig(env_files=(), write_confirmation="maybe"),
+        )
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("write_confirmation 非法值应抛 ValueError")

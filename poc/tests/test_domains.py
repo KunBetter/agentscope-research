@@ -39,3 +39,11 @@ def test_weather_registers_tools() -> None:
     domain.register_tools(registry)
     assert registry.tool_names == ("get_city_weather",)
     assert registry.specs[0].read_only is True
+
+
+def test_todo_registers_read_only_and_write_tools() -> None:
+    domain = load_domain("todo")
+    registry = ToolRegistry()
+    domain.register_tools(registry)
+    flags = {spec.func.__name__: spec.read_only for spec in registry.specs}
+    assert flags == {"list_todos": True, "add_todo": False}

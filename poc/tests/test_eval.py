@@ -39,3 +39,17 @@ def test_paths_check_any_field_matches() -> None:
         "text",
         _structured(price=None, summary="价格 1420.50 元"),
     )
+
+
+def test_list_wildcard_lookup() -> None:
+    check = {"path": ["todos", "*"], "contains": "写周报"}
+    assert _check_pass(
+        check,
+        "text",
+        _structured(todos=["写周报", "复盘贵州茅台"]),
+    )
+    assert not _check_pass(
+        check,
+        "text",
+        _structured(todos=["买菜", "取快递"]),
+    )

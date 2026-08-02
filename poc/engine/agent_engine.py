@@ -11,9 +11,12 @@ from typing import Any
 from agentscope.agent import Agent, ContextConfig, InjectionConfig, ModelConfig
 from agentscope.credential import DeepSeekCredential
 from agentscope.event import (
+    ConfirmResult,
     ModelCallEndEvent,
+    RequireUserConfirmEvent,
     ToolCallEndEvent,
     ToolCallStartEvent,
+    UserConfirmResultEvent,
 )
 from agentscope.message import Msg, UserMsg
 from agentscope.model import DeepSeekChatModel
@@ -47,6 +50,8 @@ class EngineConfig:
     """模型调用重试次数简写（转成 ModelConfig.max_retries）。"""
     fallback_model: str | None = None
     """回退模型名简写（同凭据构建，转成 ModelConfig.fallback_model）。"""
+    write_confirmation: str = "deny"
+    """写工具人工确认策略：``deny`` 默认拒绝，``confirm`` 自动确认。"""
 
     def __post_init__(self) -> None:
         self.env_files = tuple(Path(p) for p in self.env_files)
@@ -80,6 +85,7 @@ class ToolCallRecord:
     ended_at: float | None = None
     duration: float = 0.0
     parallel: bool = False
+    confirmed: bool | None = None
 
 
 class AgentEngine:
@@ -98,6 +104,11 @@ class AgentEngine:
     ) -> None:
         self.domain = domain
         self.config = config or EngineConfig()
+        if self.config.write_confirmation not in {"deny", "confirm"}:
+            raise ValueError(
+                "write_confirmation 只能是 'deny' 或 'confirm'，"
+                f"got {self.config.write_confirmation!r}",
+            )
         self.registry = ToolRegistry()
         domain.register_tools(self.registry)
         self.toolkit = self.registry.build_toolkit()
@@ -169,29 +180,52 @@ class AgentEngine:
         final_msg: Msg | None = None
         tool_calls: list[ToolCallRecord] = []
         call_starts: dict[str, ToolCallRecord] = {}
-        async for event in self.agent.reply_stream(
-            UserMsg(name="user", content=user_input),
-            structured_schema=self.domain.output_schema,
-            yield_final_msg=True,
-        ):
-            if isinstance(event, ModelCallEndEvent):
-                input_tokens += event.input_tokens
-                output_tokens += event.output_tokens
-            elif isinstance(event, Msg):
-                final_msg = event
-            elif isinstance(event, ToolCallStartEvent):
-                record = ToolCallRecord(
-                    name=event.tool_call_name,
-                    call_id=event.tool_call_id,
-                    started_at=time.monotonic(),
-                )
-                call_starts[event.tool_call_id] = record
-                tool_calls.append(record)
-            elif isinstance(event, ToolCallEndEvent):
-                record = call_starts.get(event.tool_call_id)
+        current_input: Msg | UserConfirmResultEvent = UserMsg(
+            name="user",
+            content=user_input,
+        )
+        while True:
+            pending_confirm: RequireUserConfirmEvent | None = None
+            async for event in self.agent.reply_stream(
+                current_input,
+                structured_schema=self.domain.output_schema,
+                yield_final_msg=True,
+            ):
+                if isinstance(event, ModelCallEndEvent):
+                    input_tokens += event.input_tokens
+                    output_tokens += event.output_tokens
+                elif isinstance(event, Msg):
+                    final_msg = event
+                elif isinstance(event, ToolCallStartEvent):
+                    record = ToolCallRecord(
+                        name=event.tool_call_name,
+                        call_id=event.tool_call_id,
+                        started_at=time.monotonic(),
+                    )
+                    call_starts[event.tool_call_id] = record
+                    tool_calls.append(record)
+                elif isinstance(event, ToolCallEndEvent):
+                    record = call_starts.get(event.tool_call_id)
+                    if record is not None:
+                        record.ended_at = time.monotonic()
+                        record.duration = record.ended_at - record.started_at
+                elif isinstance(event, RequireUserConfirmEvent):
+                    pending_confirm = event
+            if pending_confirm is None:
+                break
+            # HITL：按策略对挂起的写工具调用做确认/拒绝，然后继续被挂起的回复
+            confirmed = self.config.write_confirmation == "confirm"
+            for call in pending_confirm.tool_calls:
+                record = call_starts.get(call.id)
                 if record is not None:
-                    record.ended_at = time.monotonic()
-                    record.duration = record.ended_at - record.started_at
+                    record.confirmed = confirmed
+            current_input = UserConfirmResultEvent(
+                reply_id=pending_confirm.reply_id,
+                confirm_results=[
+                    ConfirmResult(confirmed=confirmed, tool_call=call)
+                    for call in pending_confirm.tool_calls
+                ],
+            )
         if final_msg is None:
             raise RuntimeError("Agent 未产生最终回复")
         for record in tool_calls:

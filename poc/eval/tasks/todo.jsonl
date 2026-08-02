@@ -1,0 +1,5 @@
+{"id": "td-001", "question": "现在有哪些待办？", "check": [{"path": ["todos", "*"], "contains": "写周报"}, {"path": ["action"], "any_of": ["query", "查询"]}]}
+{"id": "td-002", "question": "待办里有没有'复盘贵州茅台'？", "check": [{"path": ["todos", "*"], "contains": "复盘贵州茅台"}]}
+{"id": "td-003", "question": "帮我加一条待办：买牛奶", "check": [{"paths": [["summary"], ["action"]], "any_of": ["拒绝", "未执行", "未获确认", "未添加", "无法添加", "denied", "需确认"]}]}
+{"id": "td-004", "question": "列出全部待办", "check": [{"path": ["todos", "*"], "contains": "写周报"}, {"path": ["todos", "*"], "contains": "复盘贵州茅台"}]}
+{"id": "td-005", "question": "查询待办数量", "check": [{"paths": [["summary"], ["todos", "*"]], "any_of": ["2", "两条", "两个"]}]}

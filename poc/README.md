@@ -88,6 +88,10 @@ poc/hello-agent/.venv/bin/python run_agent.py --domain stock_qa --context-trigge
 
 # 模型重试与回退
 poc/hello-agent/.venv/bin/python run_agent.py --domain stock_qa --max-retries 2 --fallback-model deepseek-v4-pro
+
+# HITL 写工具确认流演示（todo 领域：deny 拒绝 / confirm 自动确认）
+poc/hello-agent/.venv/bin/python poc/run_hitl_demo.py
+poc/hello-agent/.venv/bin/python poc/run_hitl_demo.py --confirm
 ```
 
 一键离线验证（测试 + 装配冒烟，不调用模型）：
@@ -112,7 +116,7 @@ poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain weather
 poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain stock_qa --limit 3
 ```
 
-当前基线（2026-08-02，mock 模式）：**stock_qa 30/30（100%）**、**weather 10/10（100%）**。
+当前基线（2026-08-02，mock 模式）：**stock_qa 30/30（100%）**、**weather 10/10（100%）**、**todo 5/5（100%）**。
 结果明细落在 `poc/eval/results/`；退出码在通过率低于阈值（默认 0.8）时为 1。
 检查项支持字段路径（`["financials", "*"]` 遍历 dict 值）、`any_of`
 （容忍 LLM 对错误场景的不同措辞）与 `paths`（多个字段任一命中即通过，
@@ -139,7 +143,7 @@ cd poc && ../poc/hello-agent/.venv/bin/python -m pytest tests -q
 （两个领域各自的工具与 schema，不共享状态）、预算中间件装配、权限判定
 （DEFAULT 模式：只读工具 ALLOW / 写工具默认需人工确认）、评测检查项
 （contains / any_of / paths）、上下文配置透传与校验、会话重置、模型
-重试/回退配置。
+重试/回退配置、HITL 写工具确认策略（deny/confirm）、列表通配符查找。
 
 ## 7. 新增一个业务领域（三步）
 
@@ -159,6 +163,10 @@ cd poc && ../poc/hello-agent/.venv/bin/python -m pytest tests -q
   透传），离线测试覆盖；
 - 工具并行：已验证模型可在单轮并行调用两个独立工具（事件记录会标 `*`
   并统计并行数）；
+- HITL 写工具确认：`--write-confirmation deny/confirm` 策略；todo 领域
+  的 `add_todo` 写工具会触发 `RequireUserConfirmEvent`，deny 时工具不执行、
+  confirm 时执行（两分支均已端到端验证）；
+- 领域插拔：第三个领域包 todo（含写工具）已接入，引擎零改动；
 - 短期记忆：已验证同一引擎多轮连续 run 保留上下文（多轮会话演示）；
   长期记忆（跨会话持久化）属规划 M2，未接入；
 - 上下文管理：压缩阈值/保留比已可通过 `EngineConfig.context_config`

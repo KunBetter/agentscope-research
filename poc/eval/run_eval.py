@@ -26,6 +26,7 @@ from engine.agent_engine import AgentEngine, EngineConfig  # noqa: E402
 
 DEFAULT_TASKS = {
     "stock_qa": ROOT / "eval" / "tasks" / "stock_qa.jsonl",
+    "todo": ROOT / "eval" / "tasks" / "todo.jsonl",
     "weather": ROOT / "eval" / "tasks" / "weather.jsonl",
 }
 ENV_FILES = [
@@ -44,10 +45,13 @@ def _lookup(data: object, path: list[str]) -> list[object]:
             else:
                 current = current.get(key)
         elif isinstance(current, list):
-            current = [
-                item.get(key) if isinstance(item, dict) else None
-                for item in current
-            ]
+            if key == "*":
+                current = list(current)
+            else:
+                current = [
+                    item.get(key) if isinstance(item, dict) else None
+                    for item in current
+                ]
         else:
             return []
     if isinstance(current, list):

@@ -15,10 +15,12 @@ from typing import Type
 from engine.domain import DomainPackage
 
 from .stock_qa.domain import StockQaDomain
+from .todo.domain import TodoDomain
 from .weather.domain import WeatherDomain
 
 DOMAIN_REGISTRY: dict[str, Type[DomainPackage]] = {
     StockQaDomain.name: StockQaDomain,
+    TodoDomain.name: TodoDomain,
     WeatherDomain.name: WeatherDomain,
 }
 
