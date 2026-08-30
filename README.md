@@ -8,6 +8,8 @@
 | [AgentScope 可行性应用方向脑暴](docs/agentscope-applications-brainstorm.md) | 12 个应用方向及可行性分析、优先级矩阵、落地路线建议 |
 | [AgentScope 后续规划](docs/agentscope-next-steps-plan.md) | 方向决策（主攻金融投研多智能体）、POC 架构、里程碑与退出条件、风险清单 |
 | [Hello Agent 示例技术方案](docs/agentscope-hello-agent-example.md) | 最小闭环的技术架构、代码走读、使用说明、验证结论与踩坑记录 |
+| [POC 使用 SOP](docs/agentscope-poc-sop.md) | 环境准备 / 常规操作 / 评测流程 / 开发与升级流程 / 故障排查 / 命令速查 |
+| [评审与加固归档（2026-08-30）](docs/agentscope-poc-review-2026-08-30.md) | 本次会话的评估结论、改动清单、验证记录与遗留事项 |
 | [业务无关 Agent 引擎架构](poc/README.md) | 引擎层 / 业务领域层 / 工具注册表的分层设计、实现与使用说明 |
 
 ## POC
@@ -32,6 +34,9 @@
 | 2026-08-02 | 阶段 3 完成：HITL 写工具人工确认流（deny/confirm 两分支验证）、第三个领域包 todo（含写工具）插拔接入、todo 评测 5/5；修复评测列表通配符 bug |
 | 2026-08-02 | 阶段 4 收尾：验证 agentscope 2.0.5 无官方评测模块（记录结论）；自建评测新增 --all 跨领域汇总；全量 45 条基线 95.6%（两条为 LLM 措辞变体，已修复词表并单独验证） |
 | 2026-08-02 | 文件型长期记忆接入（AgenticMemoryMiddleware + 受控 Read/Write，跨会话验证通过）；版本复核：2.0.5 为 PyPI 最新，压缩/评测模块待新版本复验 |
+| 2026-08-30 | 工程卫生加固：依赖清单 requirements.txt / requirements-dev.txt（锁版本）、eval 产物 gitignore 不入库、缺失 API Key 改抛 MissingApiKeyError（CLI 退出码 2）、todo 写工具确认后真实写入（装配时重置）、评测任务集去重补覆盖、--all 汇总落盘、规划 M1 勾选同步、verify.sh 新 venv 回退 |
+| 2026-08-30 | 代码清理 + 使用 SOP：去重 5 处 .env 配置（default_env_files）、移除未使用 import 与 hello-agent 死代码、清理 __pycache__/pytest_cache/旧评测产物；新增 [POC 使用 SOP](docs/agentscope-poc-sop.md) |
+| 2026-08-30 | 结论归档：[评审与加固归档](docs/agentscope-poc-review-2026-08-30.md)（评估结论、改动清单、验证记录、遗留事项），全部改动按"代码 / 文档"两组提交入库 |
 
 **调研时间**：2026-08-01（信息以截至当日的公开资料为准）
 

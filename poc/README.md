@@ -3,6 +3,7 @@
 > 定位：在 `poc/hello-agent/`（最小闭环基线）基础上的架构升级。
 > hello_agent.py 保持不动，作为对照基线；本目录是"工具注册 + 业务领域层
 > + 引擎层"的可运行实现。
+> 快速上手与标准操作流程见 [POC 使用 SOP](../docs/agentscope-poc-sop.md)。
 
 ## 1. 分层架构
 
@@ -57,44 +58,53 @@ run_sync("贵州茅台多少钱？")
 - 工具组分组建构（`basic` 组常驻，非 basic 组需描述，转换后成为
   AgentScope `ToolGroup`）。
 
-## 3. 运行
+## 3. 环境与运行
 
-复用 hello-agent 的 venv（已锁定 `agentscope==2.0.5`，Python 3.12）：
+首次安装（Python 3.11+，已验证 3.12；依赖版本锁定见 `requirements.txt`）：
+
+```bash
+cd poc
+python3.12 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt   # 运行时 + pytest
+```
+
+以下命令均在 `poc/` 目录下执行，以 `.venv/bin/python` 为例
+（本机已有的 `hello-agent/.venv` 亦可复用，`verify.sh` 会自动回退）：
 
 ```bash
 # 列出领域包
-poc/hello-agent/.venv/bin/python run_agent.py --list-domains
+.venv/bin/python run_agent.py --list-domains
 
 # 跑投研问答（默认问题）
-poc/hello-agent/.venv/bin/python run_agent.py --domain stock_qa
+.venv/bin/python run_agent.py --domain stock_qa
 
 # 跑第二个领域，证明引擎业务无关
-poc/hello-agent/.venv/bin/python run_agent.py --domain weather
+.venv/bin/python run_agent.py --domain weather
 
 # 自定义问题
-poc/hello-agent/.venv/bin/python run_agent.py --domain weather --question "上海天气怎么样？"
+.venv/bin/python run_agent.py --domain weather --question "上海天气怎么样？"
 
 # 启用单轮 token 预算（ReplyBudgetControlMiddleware）
-poc/hello-agent/.venv/bin/python run_agent.py --domain stock_qa --budget 6000
+.venv/bin/python run_agent.py --domain stock_qa --budget 6000
 
 # 多轮会话演示（短期记忆：同一引擎连续多轮 = 同一会话）
-poc/hello-agent/.venv/bin/python poc/run_conversation.py --domain stock_qa
+.venv/bin/python poc/run_conversation.py --domain stock_qa
 
 # 上下文压缩演示（极低阈值触发压缩并打印日志）
-poc/hello-agent/.venv/bin/python poc/run_conversation.py --domain weather --compression-demo
+.venv/bin/python poc/run_conversation.py --domain weather --compression-demo
 
 # 单轮问答自定义上下文压缩阈值
-poc/hello-agent/.venv/bin/python run_agent.py --domain stock_qa --context-trigger-ratio 0.5 --context-reserve-ratio 0.2
+.venv/bin/python run_agent.py --domain stock_qa --context-trigger-ratio 0.5 --context-reserve-ratio 0.2
 
 # 模型重试与回退
-poc/hello-agent/.venv/bin/python run_agent.py --domain stock_qa --max-retries 2 --fallback-model deepseek-v4-pro
+.venv/bin/python run_agent.py --domain stock_qa --max-retries 2 --fallback-model deepseek-v4-pro
 
 # HITL 写工具确认流演示（todo 领域：deny 拒绝 / confirm 自动确认）
-poc/hello-agent/.venv/bin/python poc/run_hitl_demo.py
-poc/hello-agent/.venv/bin/python poc/run_hitl_demo.py --confirm
+.venv/bin/python poc/run_hitl_demo.py
+.venv/bin/python poc/run_hitl_demo.py --confirm
 
 # 文件型长期记忆演示（跨会话持久化；--reset 清空记忆）
-poc/hello-agent/.venv/bin/python poc/run_memory_demo.py --reset
+.venv/bin/python poc/run_memory_demo.py --reset
 ```
 
 一键离线验证（测试 + 装配冒烟，不调用模型）：
@@ -104,32 +114,36 @@ poc/hello-agent/.venv/bin/python poc/run_memory_demo.py --reset
 ```
 
 API Key 加载优先级：`poc/.env` > `poc/hello-agent/.env` > 环境变量
-（复制 `.env.example` 为 `.env` 即可）。
+（复制 `.env.example` 为 `.env` 即可）。缺失 Key 时引擎抛
+`MissingApiKeyError`，CLI 以退出码 2 清晰报错（不抛堆栈）。
 
 ## 4. 评测基线（保守优先：先量化，再改进）
 
 ```bash
-# 跑 stock_qa 基线（20 条，mock 模式：确定性，可精确打分）
-poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain stock_qa
+# 跑 stock_qa 基线（30 条，mock 模式：确定性，可精确打分）
+.venv/bin/python poc/eval/run_eval.py --domain stock_qa
 
-# 跑 weather 基线（6 条）
-poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain weather
+# 跑 weather 基线（10 条）
+.venv/bin/python poc/eval/run_eval.py --domain weather
 
-# 跑全部领域并输出汇总表（跨领域一致性对比）
-poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --all
+# 跑全部领域并输出汇总表（跨领域一致性对比），汇总同时落盘 all_summary_*.json
+.venv/bin/python poc/eval/run_eval.py --all
 
 # 只跑前 N 条 / 自定义任务集
-poc/hello-agent/.venv/bin/python poc/eval/run_eval.py --domain stock_qa --limit 3
+.venv/bin/python poc/eval/run_eval.py --domain stock_qa --limit 3
 ```
 
-当前基线（2026-08-02，mock 模式）：**stock_qa 30/30（100%）**、**weather 10/10（100%）**、**todo 5/5（100%）**。
-结果明细落在 `poc/eval/results/`；退出码在通过率低于阈值（默认 0.8）时为 1。
+**基线口径**：任务集 stock_qa 30 条 / weather 10 条 / todo 5 条（2026-08-30
+对 sq-013~015 去重替换为新的财务指标点，此前数字为 2026-08-02 记录：
+stock_qa 30/30、weather 10/10、todo 5/5，mock 100%；**调整后需重新跑
+`--all` 生成新基线**）。结果明细落在 `poc/eval/results/`（**已 gitignore，
+不入库**）；退出码在通过率低于阈值（默认 0.8）时为 1。
 检查项支持字段路径（`["financials", "*"]` 遍历 dict 值）、`any_of`
 （容忍 LLM 对错误场景的不同措辞）与 `paths`（多个字段任一命中即通过，
 如错误信息可能出现在 price 或 summary）。
 
 回归对比：`--baseline <上次结果.json>` 输出 修复/回归/新增 差异，
-存在回归时退出码为 1。
+存在回归时退出码为 1（先跑一次留存结果文件，再在后续改动后对比）。
 
 > 官方评测模块验证结论（2026-08-02）：`agentscope==2.0.5` 安装包中
 > **没有评测模块**（顶层子模块与 agent 导出均无 eval），技术报告声称的
@@ -148,15 +162,16 @@ stock_qa / weather 的工具全部使用**确定性 mock 数据**，不依赖任
 ## 6. 测试（离线，不调用模型）
 
 ```bash
-poc/hello-agent/.venv/bin/pip install pytest
-cd poc && ../poc/hello-agent/.venv/bin/python -m pytest tests -q
+.venv/bin/python -m pytest tests -q    # 在 poc/ 目录下执行
 ```
 
 覆盖：工具注册（函数式 / 装饰器 / 分组 / 只读标记）、领域包契约、引擎装配
-（两个领域各自的工具与 schema，不共享状态）、预算中间件装配、权限判定
+（三个领域各自的工具与 schema，不共享状态）、预算中间件装配、权限判定
 （DEFAULT 模式：只读工具 ALLOW / 写工具默认需人工确认）、评测检查项
 （contains / any_of / paths）、上下文配置透传与校验、会话重置、模型
-重试/回退配置、HITL 写工具确认策略（deny/confirm）、列表通配符查找。
+重试/回退配置、HITL 写工具确认策略（deny/confirm）、列表通配符查找、
+API Key 加载（缺失抛 `MissingApiKeyError` / `.env` 优先级）、todo 写工具
+真实写入与装配重置。
 
 ## 7. 新增一个业务领域（三步）
 
@@ -178,7 +193,12 @@ cd poc && ../poc/hello-agent/.venv/bin/python -m pytest tests -q
   并统计并行数）；
 - HITL 写工具确认：`--write-confirmation deny/confirm` 策略；todo 领域
   的 `add_todo` 写工具会触发 `RequireUserConfirmEvent`，deny 时工具不执行、
-  confirm 时执行（两分支均已端到端验证）；
+  confirm 时执行（两分支均已端到端验证）；confirm 后**真实写入**列表
+  （进程内演示状态，非持久化；每次引擎装配重置为初始两条，评测/演示互不影响）；
+- 工程卫生（2026-08-30）：依赖清单 `requirements.txt` / `requirements-dev.txt`
+  （锁版本）；`eval/results/` 产物 gitignore 不入库；缺失 API Key 抛
+  `MissingApiKeyError`（CLI 退出码 2，不抛堆栈）；评测任务集 sq-013~015
+  去重替换为新财务指标点；`--all` 汇总落盘 `all_summary_*.json`；
 - 领域插拔：第三个领域包 todo（含写工具）已接入，引擎零改动；
 - 短期记忆：已验证同一引擎多轮连续 run 保留上下文（多轮会话演示）；
   长期记忆：文件型已接入（`--memory-dir` 启用 `AgenticMemoryMiddleware`

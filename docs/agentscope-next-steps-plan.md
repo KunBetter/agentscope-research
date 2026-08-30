@@ -105,8 +105,8 @@
 ### M1（第 1~2 周）：单 Agent 数据问答验证
 
 - [x] 自定义 Tool（mock 演示数据）：`get_stock_price` / `get_stock_financials`（数据层与外部数据源解耦，真实数据源按需再接入）
-- [ ] 配置权限：数据工具只读，命令/写文件工具默认拒绝
-- [ ] 验证结构化输出（研报 JSON Schema，v2.0.5）
+- [x] 配置权限：数据工具只读，命令/写文件工具默认拒绝（2026-08-30 核对：POC 已实现并有离线测试覆盖）
+- [x] 验证结构化输出（研报 JSON Schema，v2.0.5）（2026-08-30 核对：POC 已实现并有离线测试覆盖）
 - [ ] 接入 `BudgetControlMiddleware`，记录单任务 token 成本
 - [ ] 建立首批评测集（20~50 条典型投研任务，如"某标的 PE/PB/ROE 趋势""财报数据与口径核对"）
 
@@ -179,5 +179,8 @@
 | 2026-08-02 | 阶段 3 | HITL 写工具确认流：`EngineConfig.write_confirmation`（deny/confirm），todo 领域 `add_todo` 触发 `RequireUserConfirmEvent`，两分支端到端验证；第三个领域包 todo（只读 + 写工具）接入，引擎零改动；todo 评测 5/5；修复评测 `*` 通配符在列表上的查找 bug |
 | 2026-08-02 | 阶段 4（官方评测验证） | 验证结论：`agentscope==2.0.5` 安装包无评测模块（子模块/导出均无 eval），官方 Evaluation API 对比接入不可行；保守替代：自建评测新增 `--all` 跨领域汇总。全量 45 条一次汇总 43/45（95.6%），两条失败为检查词表未覆盖 LLM 措辞变体，已修复并单独验证 |
 | 2026-08-02 | 长期记忆 + 版本复核 | 文件型长期记忆接入：`--memory-dir` 启用 `AgenticMemoryMiddleware` + 受控 Read/Write 工具（Write 仅允许写记忆目录），跨会话取回端到端验证通过。版本复核：`pip index versions agentscope` 显示最新仍为 2.0.5，暂无升级目标；压缩后结构化输出不稳定为间歇性（复验触发两次压缩未见失败），官方评测模块缺失结论维持 |
+| 2026-08-30 | 工程卫生加固 | 依赖清单 `requirements.txt`/`requirements-dev.txt`（锁版本）；`eval/results/` 产物 gitignore 不入库；缺失 API Key 改抛 `MissingApiKeyError`（CLI 退出码 2）；todo 写工具确认后真实写入（装配时重置状态）；评测任务集 sq-013~015 去重替换补覆盖（新增 PB/PE 数据点）；`--all` 汇总落盘；规划 M1 勾选框同步；`verify.sh` 支持新 venv 回退；新增 env_loader 与 todo 写入离线测试 |
 
-**当前状态**：M0 ✅；架构升级 ✅；开发列表非多 Agent 项全部落地；文件型长期记忆接入并通过跨会话验证；版本复核：2.0.5 为 PyPI 最新（升级路径暂无目标）→ 待新版本发布后复验压缩/评测模块；多 Agent 与真实数据源按需再评估。
+**当前状态**：M0 ✅；架构升级 ✅；M1 全部 ✅（任务集调整后基线数字待重跑 `--all` 刷新）；
+文件型长期记忆接入并通过跨会话验证；版本复核：2.0.5 为 PyPI 最新（升级路径暂无目标）
+→ 待新版本发布后复验压缩/评测模块；多 Agent（M2）与真实数据源按需再评估。
