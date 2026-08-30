@@ -23,6 +23,7 @@ def test_memory_middleware_and_tools_attached(tmp_path) -> None:
     engine = _build_engine(tmp_path)
     assert engine.memory_root == tmp_path
     assert engine.memory_root.exists()
+    # 注：以下访问 AgentScope 私有属性，若框架升级后失败，先检查该处
     assert any(
         isinstance(mw, AgenticMemoryMiddleware)
         for mw in engine.agent._reply_middlewares

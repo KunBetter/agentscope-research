@@ -12,15 +12,11 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
+import sys
 
 from domains import load_domain
 from engine.agent_engine import AgentEngine, EngineConfig
-
-DEFAULT_ENV_FILES = [
-    Path(__file__).parent / ".env",
-    Path(__file__).parent / "hello-agent" / ".env",
-]
+from engine.env_loader import MissingApiKeyError, default_env_files
 
 QUESTION = "帮我加一条待办：周五复盘贵州茅台"
 
@@ -35,10 +31,14 @@ def main() -> int:
     args = parser.parse_args()
 
     policy = "confirm" if args.confirm else "deny"
-    engine = AgentEngine(
-        load_domain("todo"),
-        EngineConfig(env_files=DEFAULT_ENV_FILES, write_confirmation=policy),
-    )
+    try:
+        engine = AgentEngine(
+            load_domain("todo"),
+            EngineConfig(env_files=default_env_files(), write_confirmation=policy),
+        )
+    except MissingApiKeyError as exc:
+        print(f"错误: {exc}", file=sys.stderr)
+        return 2
     print(f"策略: {policy} | 工具: {', '.join(engine.registry.tool_names)}")
     print(f"Q: {QUESTION}\n")
 

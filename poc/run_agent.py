@@ -13,15 +13,11 @@ API Key 加载优先级：poc/.env > poc/hello-agent/.env > 环境变量
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
+import sys
 
 from domains import DOMAIN_REGISTRY, list_domains, load_domain
 from engine.agent_engine import AgentEngine, EngineConfig
-
-DEFAULT_ENV_FILES = [
-    Path(__file__).parent / ".env",
-    Path(__file__).parent / "hello-agent" / ".env",
-]
+from engine.env_loader import MissingApiKeyError, default_env_files
 
 DEFAULT_QUESTIONS = {
     "stock_qa": "贵州茅台（600519）现在多少钱？顺便看一下它的 ROE。",
@@ -123,19 +119,23 @@ def main() -> int:
                 else 0.1
             ),
         )
-    engine = AgentEngine(
-        domain,
-        EngineConfig(
-            model_name=args.model,
-            env_files=DEFAULT_ENV_FILES,
-            token_budget=args.budget,
-            context_config=context_config,
-            max_retries=args.max_retries,
-            fallback_model=args.fallback_model,
-            write_confirmation=args.write_confirmation,
-            memory_dir=args.memory_dir,
-        ),
-    )
+    try:
+        engine = AgentEngine(
+            domain,
+            EngineConfig(
+                model_name=args.model,
+                env_files=default_env_files(),
+                token_budget=args.budget,
+                context_config=context_config,
+                max_retries=args.max_retries,
+                fallback_model=args.fallback_model,
+                write_confirmation=args.write_confirmation,
+                memory_dir=args.memory_dir,
+            ),
+        )
+    except MissingApiKeyError as exc:
+        print(f"错误: {exc}", file=sys.stderr)
+        return 2
 
     question = args.question or DEFAULT_QUESTIONS[args.domain]
     print(

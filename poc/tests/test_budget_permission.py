@@ -30,7 +30,7 @@ def test_budget_middleware_attached() -> None:
         load_domain("stock_qa"),
         EngineConfig(env_files=(), token_budget=1000),
     )
-    # ReplyBudgetControlMiddleware 实现 on_reply，应出现在 Agent 的回复中间件链
+    # 注：以下访问 AgentScope 私有属性，若框架升级后失败，先检查该处
     assert len(engine.agent._reply_middlewares) == 1
 
 

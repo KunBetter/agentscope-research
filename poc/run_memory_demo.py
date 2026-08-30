@@ -13,24 +13,25 @@ from __future__ import annotations
 
 import argparse
 import shutil
+import sys
 from pathlib import Path
 
 from domains import load_domain
 from engine.agent_engine import AgentEngine, EngineConfig
-
-DEFAULT_ENV_FILES = [
-    Path(__file__).parent / ".env",
-    Path(__file__).parent / "hello-agent" / ".env",
-]
+from engine.env_loader import MissingApiKeyError, default_env_files
 
 DEFAULT_MEMORY_DIR = Path(__file__).parent / "memory" / "stock_qa"
 
 
 def _engine(memory_dir: Path) -> AgentEngine:
-    return AgentEngine(
-        load_domain("stock_qa"),
-        EngineConfig(env_files=DEFAULT_ENV_FILES, memory_dir=str(memory_dir)),
-    )
+    try:
+        return AgentEngine(
+            load_domain("stock_qa"),
+            EngineConfig(env_files=default_env_files(), memory_dir=str(memory_dir)),
+        )
+    except MissingApiKeyError as exc:
+        print(f"错误: {exc}", file=sys.stderr)
+        raise SystemExit(2) from exc
 
 
 def main() -> int:

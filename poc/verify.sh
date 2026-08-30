@@ -3,7 +3,11 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-PY="hello-agent/.venv/bin/python"
+# 优先用 poc/.venv（requirements 安装），回退 hello-agent/.venv
+PY=".venv/bin/python"
+if [ ! -x "$PY" ]; then
+  PY="hello-agent/.venv/bin/python"
+fi
 
 echo "== 1/3 离线测试 =="
 "$PY" -m pytest tests -q

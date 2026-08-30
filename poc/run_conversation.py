@@ -14,17 +14,13 @@ from __future__ import annotations
 
 import argparse
 import logging
-from pathlib import Path
+import sys
 
 from agentscope.agent import ContextConfig, InjectionConfig
 
-from domains import list_domains, load_domain
+from domains import load_domain
 from engine.agent_engine import AgentEngine, EngineConfig
-
-DEFAULT_ENV_FILES = [
-    Path(__file__).parent / ".env",
-    Path(__file__).parent / "hello-agent" / ".env",
-]
+from engine.env_loader import MissingApiKeyError, default_env_files
 
 TURNS = {
     "stock_qa": [
@@ -64,14 +60,18 @@ def main() -> int:
     else:
         injection_config = None
 
-    engine = AgentEngine(
-        load_domain(args.domain),
-        EngineConfig(
-            env_files=DEFAULT_ENV_FILES,
-            context_config=context_config,
-            injection_config=injection_config,
-        ),
-    )
+    try:
+        engine = AgentEngine(
+            load_domain(args.domain),
+            EngineConfig(
+                env_files=default_env_files(),
+                context_config=context_config,
+                injection_config=injection_config,
+            ),
+        )
+    except MissingApiKeyError as exc:
+        print(f"错误: {exc}", file=sys.stderr)
+        return 2
     print(
         f"领域: {args.domain} | 会话: {engine.agent.state.session_id[:8]} "
         f"| 压缩: {'演示(trigger=0.04)' if context_config else '默认'}",

@@ -7,7 +7,7 @@ from engine.tool_registry import ToolRegistry
 
 from .prompts import SYSTEM_PROMPT
 from .schemas import TodoReport
-from .tools import add_todo, list_todos
+from .tools import add_todo, list_todos, reset_todos
 
 
 class TodoDomain(DomainPackage):
@@ -19,6 +19,7 @@ class TodoDomain(DomainPackage):
     output_schema = TodoReport
 
     def register_tools(self, registry: ToolRegistry) -> None:
+        reset_todos()  # 每次装配全新状态（引擎/评测互不影响）
         registry.register(list_todos, read_only=True)
         registry.register(
             add_todo,

@@ -26,9 +26,6 @@ from agentscope.model import DeepSeekChatModel
 from agentscope.tool import FunctionTool, Toolkit
 
 DEEPSEEK_MODEL = "deepseek-v4-flash"
-FALLBACK_ENV_PATHS = [
-    Path(__file__).parent / ".env",
-]
 
 
 def get_stock_price(symbol: str) -> str:
@@ -49,11 +46,6 @@ def _load_api_key() -> str:
     env_path = Path(__file__).parent / ".env"
     if env_path.exists():
         load_dotenv(env_path, override=True)
-    else:
-        for path in FALLBACK_ENV_PATHS:
-            if path.exists():
-                load_dotenv(path, override=True)
-                break
     if os.getenv("DEEPSEEK_API_KEY"):
         return os.environ["DEEPSEEK_API_KEY"]
     raise SystemExit(

@@ -23,16 +23,16 @@ sys.path.insert(0, str(ROOT))
 
 from domains import load_domain  # noqa: E402
 from engine.agent_engine import AgentEngine, EngineConfig  # noqa: E402
+from engine.env_loader import (  # noqa: E402
+    MissingApiKeyError,
+    default_env_files,
+)
 
 DEFAULT_TASKS = {
     "stock_qa": ROOT / "eval" / "tasks" / "stock_qa.jsonl",
     "todo": ROOT / "eval" / "tasks" / "todo.jsonl",
     "weather": ROOT / "eval" / "tasks" / "weather.jsonl",
 }
-ENV_FILES = [
-    ROOT / ".env",
-    ROOT / "hello-agent" / ".env",
-]
 
 
 def _lookup(data: object, path: list[str]) -> list[object]:
@@ -99,7 +99,7 @@ async def run_tasks(
     tasks: list[dict],
     budget: float | None,
 ) -> list[dict]:
-    config = EngineConfig(env_files=ENV_FILES, token_budget=budget)
+    config = EngineConfig(env_files=default_env_files(), token_budget=budget)
     results = []
     total = len(tasks)
     for index, task in enumerate(tasks, 1):
@@ -172,14 +172,19 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.all:
+        Path(args.out_dir).mkdir(parents=True, exist_ok=True)
         summary = []
         any_fail = False
         for domain_name in sorted(DEFAULT_TASKS):
             tasks = load_tasks(DEFAULT_TASKS[domain_name])
             print(f"\n=== {domain_name} ===")
-            results = asyncio.run(
-                run_tasks(domain_name, tasks, budget=args.budget),
-            )
+            try:
+                results = asyncio.run(
+                    run_tasks(domain_name, tasks, budget=args.budget),
+                )
+            except MissingApiKeyError as exc:
+                print(f"错误: {exc}", file=sys.stderr)
+                return 2
             passed_n = sum(1 for r in results if r["passed"])
             accuracy = passed_n / len(results)
             tokens = sum(
@@ -215,6 +220,35 @@ def main() -> int:
             f"合计      {total_pass}/{total_tasks} "
             f"{total_pass / total_tasks:.1%} | token {total_tokens}",
         )
+        summary_stamp = time.strftime("%Y%m%d-%H%M%S")
+        summary_path = Path(args.out_dir) / f"all_summary_{summary_stamp}.json"
+        summary_path.write_text(
+            json.dumps(
+                {
+                    "timestamp": summary_stamp,
+                    "threshold": args.threshold,
+                    "domains": {
+                        name: {
+                            "passed": passed_n,
+                            "total": total,
+                            "accuracy": round(accuracy, 4),
+                            "tokens": tokens,
+                        }
+                        for name, passed_n, total, accuracy, tokens in summary
+                    },
+                    "total": {
+                        "passed": total_pass,
+                        "total": total_tasks,
+                        "accuracy": round(total_pass / total_tasks, 4),
+                        "tokens": total_tokens,
+                    },
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        print(f"汇总已保存: {summary_path}")
         return 1 if any_fail else 0
 
     tasks_file = (
@@ -225,7 +259,11 @@ def main() -> int:
         tasks = tasks[: args.limit]
 
     print(f"评测: domain={args.domain} tasks={len(tasks)} mode=mock")
-    results = asyncio.run(run_tasks(args.domain, tasks, budget=args.budget))
+    try:
+        results = asyncio.run(run_tasks(args.domain, tasks, budget=args.budget))
+    except MissingApiKeyError as exc:
+        print(f"错误: {exc}", file=sys.stderr)
+        return 2
 
     passed = sum(1 for r in results if r["passed"])
     total_tokens = sum(
