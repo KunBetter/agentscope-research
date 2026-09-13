@@ -6,8 +6,8 @@
 
 用法::
 
-    poc/hello-agent/.venv/bin/python poc/run_conversation.py --domain stock_qa
-    poc/hello-agent/.venv/bin/python poc/run_conversation.py --domain weather --compression-demo
+    poc/.venv/bin/python run_conversation.py --domain stock_qa
+    poc/.venv/bin/python run_conversation.py --domain weather --compression-demo
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ import argparse
 import logging
 import sys
 
-from agentscope.agent import ContextConfig, InjectionConfig
+from agentscope.agent import ContextConfig
 
 from domains import load_domain
 from engine.agent_engine import AgentEngine, EngineConfig
@@ -55,10 +55,8 @@ def main() -> int:
         context_config = ContextConfig(
             trigger_ratio=0.04,
             reserve_ratio=0.02,
+            context_buffer_ratio=0.02,
         )
-        injection_config = InjectionConfig(context_buffer_ratio=0.02)
-    else:
-        injection_config = None
 
     try:
         engine = AgentEngine(
@@ -66,7 +64,6 @@ def main() -> int:
             EngineConfig(
                 env_files=default_env_files(),
                 context_config=context_config,
-                injection_config=injection_config,
             ),
         )
     except MissingApiKeyError as exc:
@@ -100,11 +97,7 @@ def main() -> int:
         except Exception as exc:  # noqa: BLE001 - 演示脚本记录失败继续
             print(f"A: [失败] {type(exc).__name__}: {exc}")
             if args.compression_demo:
-                print(
-                    "   注: 压缩已触发，该轮结构化输出失败——已知限制："
-                    "上下文压缩与结构化输出在 agentscope 2.0.5 + DeepSeek "
-                    "组合下不稳定，详见 poc/README 已知问题。",
-                )
+                print("   注: 压缩演示轮出现失败，请检查上下文压缩配置。")
 
     print("\n=== 短期记忆验证 ===")
     print(

@@ -1,7 +1,7 @@
-"""AgentScope 2.0.5 最小场景：单个 ReActAgent + DeepSeek + 一个只读工具。
+"""AgentScope 2.0 最小场景：单个 ReActAgent + DeepSeek + 一个只读工具。
 
 验证目标（最小闭环）：
-  1. agentscope 2.0.5 安装可用；
+  1. agentscope 2.0 安装可用；
   2. DeepSeek 模型接入（含 CoT thinking 与流式）；
   3. 自定义 Tool 注册 + 工具调用闭环（Agent 先调工具、再基于结果作答）。
 

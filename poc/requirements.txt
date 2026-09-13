@@ -1,5 +1,5 @@
 # 运行时依赖（Python 3.11+，已在 3.12 venv 验证）
 # 安装：python3.12 -m venv .venv && .venv/bin/pip install -r requirements.txt
-agentscope==2.0.5
-pydantic==2.13.4
+agentscope==2.0.8
+pydantic==2.13.5
 python-dotenv==1.2.2

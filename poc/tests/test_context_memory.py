@@ -43,13 +43,18 @@ def test_invalid_context_config_raises() -> None:
 
 def test_injection_config_propagates_to_agent() -> None:
     engine = _build_engine(
-        injection_config=InjectionConfig(
-            inject_runtime_state=False,
-            context_buffer_ratio=0.02,
-        ),
+        injection_config=InjectionConfig(inject_runtime_state=False),
     )
     assert engine.agent.injection_config.inject_runtime_state is False
-    assert engine.agent.injection_config.context_buffer_ratio == 0.02
+
+
+def test_context_buffer_ratio_propagates_to_agent() -> None:
+    # 2.0.8 起 context_buffer_ratio 归属 ContextConfig
+    # （InjectionConfig 上的同名参数已弃用）
+    engine = _build_engine(
+        context_config=ContextConfig(context_buffer_ratio=0.02),
+    )
+    assert engine.agent.context_config.context_buffer_ratio == 0.02
 
 
 def test_reset_starts_new_session() -> None:

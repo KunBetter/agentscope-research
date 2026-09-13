@@ -2,6 +2,14 @@
 
 > 调研对象：阿里巴巴通义实验室开源的多智能体开发框架 AgentScope
 > 调研时间：2026-08-01 ｜ 信息来源：GitHub 仓库与 Release、官方文档（doc.agentscope.io / runtime.agentscope.io）、官方技术论文（arXiv）、阿里云开发者社区及公开媒体报道
+>
+> **2026-09-13 修订备注**（本文是 2026-08-01 的快照，部分事实已过时，以本备注为准）：
+> Python 最新版为 **2.0.8**（2026-09-08 发布，本项目已升级并锁该版本）；Java 最新为 **v2.0.3**（2026-09-07）；
+> 主仓库 stars 约 **31.5k**（2026-09-13）；**评测能力不在主库** —— 官方评测框架是独立仓库
+> **OpenJudge**（PyPI `py-openjudge`），故 §2.4 与 §5.2 第 4 条关于"评测模块"的表述需按此更正；
+> Runtime 仓库 README 已挂归档通知（转只读，GitHub 归档标记尚为 `false`，最后提交 2026-06-04）；
+> 新增模块：主库 `2.0.8` 含 `console` / `pipeline` / `realtime`，Java 侧有 HarnessAgent 双层架构。
+> 详见 [后续规划](agentscope-next-steps-plan.md) 附录 A 与根 `README.md` 进展日志。
 
 ---
 

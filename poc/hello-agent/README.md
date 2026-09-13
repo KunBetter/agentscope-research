@@ -1,11 +1,12 @@
 # Hello Agent（最小场景）
 
-验证 AgentScope 2.0.5 的最小闭环：**单个 ReActAgent + DeepSeek + 一个只读工具**。
+验证 AgentScope 2.0 的最小闭环：**单个 ReActAgent + DeepSeek + 一个只读工具**。
+依赖版本与 `poc/requirements.txt` 保持一致（当前 `agentscope==2.0.8`）。
 
 ```bash
 # 首次
 /usr/local/bin/python3.12 -m venv .venv
-.venv/bin/pip install agentscope==2.0.5
+.venv/bin/pip install agentscope==2.0.8
 
 # 运行（API Key 自动从环境变量 / 本目录 .env 读取）
 .venv/bin/python hello_agent.py

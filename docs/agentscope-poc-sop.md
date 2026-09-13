@@ -40,8 +40,8 @@ python3.12 -m venv .venv
 .venv/bin/pip install -r requirements-dev.txt   # 内含 requirements.txt（运行时）+ pytest
 ```
 
-> 依赖版本锁定在 `requirements.txt`（当前 `agentscope==2.0.5` / `pydantic==2.13.4` / `python-dotenv==1.2.2`）。
-> 若本机已有 `hello-agent/.venv`（旧环境），`verify.sh` 会自动回退使用，无需重建。
+> 依赖版本锁定在 `requirements.txt`（当前 `agentscope==2.0.8` / `pydantic==2.13.5` / `python-dotenv==1.2.2`）。
+> 若本机已有 `hello-agent/.venv`（对照基线环境），`verify.sh` 会自动回退使用，无需重建。
 
 ### 1.2 配置 API Key
 
@@ -153,8 +153,11 @@ cp .env.example .env    # 编辑填入 DEEPSEEK_API_KEY
 2. 确认升级目标后：修改 `requirements.txt` 锁版本 → 重建/更新 venv → 跑 `./verify.sh`；
 3. **必验项**（历史教训）：
    - DeepSeek formatter / 工具调用 / 结构化输出兼容性（`run_agent.py --domain stock_qa`）；
-   - 上下文压缩 + 结构化输出组合是否仍稳定（`--compression-demo`，2.0.5 下间歇性不稳定）；
-   - 官方评测模块是否恢复（2.0.5 中缺失，结论记录于 `poc/README.md` §4）；
+   - 上下文压缩 + 结构化输出组合是否仍稳定（`--compression-demo`，建议连跑数轮统计失败次数；
+     2.0.5 上间歇性失败，2.0.8 起已消除）；
+   - 关注新增弃用告警（`pytest -W error::DeprecationWarning` 或 `verify.sh` 输出；
+     2.0.8 曾把 `context_buffer_ratio` 从 `InjectionConfig` 迁至 `ContextConfig`）；
+   - 评测能力位置：主库不含 eval，官方框架在独立仓库 OpenJudge（`poc/README.md` §4）；
    - 重跑 `--all` 建新基线；
 4. 更新文档中的版本复核结论（根 `README.md` 进展日志 + 本 SOP 无版本号硬编码处检查）。
 
@@ -168,7 +171,7 @@ cp .env.example .env    # 编辑填入 DEEPSEEK_API_KEY
 | `错误: 缺少 DEEPSEEK_API_KEY…`（退出码 2） | 未配置 Key | 按 §1.2 配置 `.env`；`run_*` 命令缺 Key 属配置错误，应整体退出而非逐条失败 |
 | 模型调用 `exhausted all attempts` | 网络 / 限流 / 凭据失败 | 看异常根因；加 `--max-retries 2 --fallback-model deepseek-v4-pro` |
 | 找不到 agentscope 模块 | venv 不对 / 未安装 | 统一用 `.venv/bin/python`（或 `hello-agent/.venv/bin/python`） |
-| 压缩后结构化输出失败（`--compression-demo`） | 已知限制：2.0.5 + DeepSeek 间歇性不稳定 | 重试一次；默认压缩阈值（0.8）下正常对话不触发 |
+| 压缩后结构化输出失败（`--compression-demo`） | 2.0.5 的历史问题：压缩与结构化输出组合不稳定 | **已在 2.0.8 消除**（8 轮 72 次对话 0 失败）；若仍出现请检查 `ContextConfig` 配置（勿再用已弃用的 `InjectionConfig.context_buffer_ratio`） |
 | 评测全部失败且非 Key 问题 | 任务/检查项与 mock 不一致 | 按 §3.4 校验任务集；`--limit 3` 先跑前 3 条定位 |
 | 升级 AgentScope 后测试挂 | 测试依赖框架私有 API（`_reply_middlewares` 等，有注释标注） | 按 §5 复验；必要时调整测试断言 |
 

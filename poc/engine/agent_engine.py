@@ -38,12 +38,12 @@ class EngineConfig:
     max_tokens: int = 2000
     stream: bool = True
     token_budget: float | None = None
-    """单轮 token 预算；None 表示不启用预算控制（2.0.5 用
+    """单轮 token 预算；None 表示不启用预算控制（用
     ``ReplyBudgetControlMiddleware``）。"""
     context_config: ContextConfig | None = None
     """上下文压缩配置；None 表示使用框架默认（trigger_ratio=0.8）。"""
     injection_config: InjectionConfig | None = None
-    """运行时状态注入配置（时间/上下文占用）；None 使用框架默认。"""
+    """运行时状态注入配置（时间/运行态提示）；None 使用框架默认。"""
     model_config: ModelConfig | None = None
     """完整模型配置（重试/回退）；与 max_retries/fallback_model 二选一。"""
     max_retries: int | None = None

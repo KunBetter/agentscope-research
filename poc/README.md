@@ -133,11 +133,12 @@ API Key 加载优先级：`poc/.env` > `poc/hello-agent/.env` > 环境变量
 .venv/bin/python poc/eval/run_eval.py --domain stock_qa --limit 3
 ```
 
-**基线口径**：任务集 stock_qa 30 条 / weather 10 条 / todo 5 条（2026-08-30
-对 sq-013~015 去重替换为新的财务指标点，此前数字为 2026-08-02 记录：
-stock_qa 30/30、weather 10/10、todo 5/5，mock 100%；**调整后需重新跑
-`--all` 生成新基线**）。结果明细落在 `poc/eval/results/`（**已 gitignore，
-不入库**）；退出码在通过率低于阈值（默认 0.8）时为 1。
+**基线口径**：任务集 stock_qa 30 条 / weather 10 条 / todo 5 条。
+**基线已刷新（2026-09-13 重跑 `--all`）：45/45，100%，累计 179,486 tokens，
+实测成本 0.10 CNY**（2026-08-30 调整任务集后一直未重跑，旧数字 43/45 = 95.6%
+作废）。结果明细落在 `poc/eval/results/`（**已 gitignore，不入库**），
+`--all` 汇总同时落盘 `all_summary_*.json`；退出码在通过率低于阈值
+（默认 0.8）时为 1。
 检查项支持字段路径（`["financials", "*"]` 遍历 dict 值）、`any_of`
 （容忍 LLM 对错误场景的不同措辞）与 `paths`（多个字段任一命中即通过，
 如错误信息可能出现在 price 或 summary）。
@@ -145,12 +146,14 @@ stock_qa 30/30、weather 10/10、todo 5/5，mock 100%；**调整后需重新跑
 回归对比：`--baseline <上次结果.json>` 输出 修复/回归/新增 差异，
 存在回归时退出码为 1（先跑一次留存结果文件，再在后续改动后对比）。
 
-> 官方评测模块验证结论（2026-08-02）：`agentscope==2.0.5` 安装包中
-> **没有评测模块**（顶层子模块与 agent 导出均无 eval），技术报告声称的
-> "统一评测接口 + 双评测器"与实际安装版本不符。按保守原则不引入外部评测
-> 依赖，以自建基线（`--all` 汇总 + `--baseline` 对比）作为参照。
-> 一次全量 45 条汇总为 43/45（95.6%），其中 2 条失败为 LLM 措辞变体
-> 未被检查词表覆盖（"暂不可查"/"暂无/无法生成"），已修复词表并单独验证。
+> 官方评测能力位置（2026-09-13 更正）：`agentscope` 主库**不含评测模块**
+> （已核对 2.0.5 与 2.0.8 两个 wheel，顶层子模块与导出均无 eval），但评测能力
+> 并不缺失——官方评测框架在**独立仓库**
+> [OpenJudge](https://github.com/agentscope-ai/OpenJudge)（PyPI `py-openjudge`），
+> 轨迹可视化在 `agentscope-studio`。技术报告中"统一评测接口 + 双评测器"指的是
+> 该独立项目，而非安装包内容。本项目暂不引入外部评测依赖，以自建基线
+> （`--all` 汇总 + `--baseline` 对比）作为参照，后续可在 M2 阶段 4 用 OpenJudge
+> 做交叉验证。
 
 ## 5. 数据源策略（当前全部 mock）
 
@@ -205,12 +208,18 @@ API Key 加载（缺失抛 `MissingApiKeyError` / `.env` 优先级）、todo 写
   + 受控 Read/Write 工具，Write 仅允许写入记忆目录），跨会话取回验证通过；
 - 上下文管理：压缩阈值/保留比已可通过 `EngineConfig.context_config`
   或 CLI `--context-trigger-ratio / --context-reserve-ratio` 配置；
-- 已知限制：上下文压缩触发后，结构化输出生成在 agentscope 2.0.5 +
-  DeepSeek 组合下**间歇性**不稳定（`--compression-demo`：压缩日志出现后，
-  下一轮结构化输出可能失败；复验一次触发两次压缩未见失败）；默认压缩
-  阈值（0.8）下正常对话不受影响；
-- 版本复核（2026-08-02）：`pip index versions agentscope` 显示 **PyPI
-  最新仍为 2.0.5**，暂无升级目标；官方评测模块在 2.0.5 中缺失的结论
-  维持，待新版本发布后复验；
+  缓冲区比例 `context_buffer_ratio` 在 2.0.8 起归属 `ContextConfig`
+  （`InjectionConfig` 上的同名参数已弃用，本项目已迁移）；
+- ~~已知限制：压缩后结构化输出间歇性不稳定~~ **已解决（2026-09-13，升级 2.0.8）**：
+  在 2.0.5 上复现（3 轮 × 9 次对话共 3 次 `Failed to generate structured
+  output`），升级 2.0.8 后 8 轮 × 9 次对话共 14 次压缩触发**零失败**。
+  根因：2.0.8 的 `ContextConfig` 新增 `compression_fallback_to_truncation=True`
+  与结构化摘要模板（`compression_prompt` / `summary_template`），压缩不再破坏
+  消息序列。原 2.0.5 上的现象与规避方式记录见
+  [评审归档](docs/agentscope-poc-review-2026-08-30.md)（历史快照）；
+- 版本（2026-09-13）：**已升级 `agentscope==2.0.8`**（PyPI 最新，2026-09-08 发布；
+  `pydantic` 随之 2.13.4 → 2.13.5）。升级验证：41 项离线测试全绿（新增 1 条
+  `context_buffer_ratio` 归属测试，共 42 项）→ 全量评测 45/45（100%，180,092 tokens）
+  → 压缩场景 8 轮零失败；只有一处弃用告警（已修）；
 - 单 Agent 单轮：多 Agent 链路（规划 M2）将在领域包契约上扩展
   pipeline 拓扑出口，引擎层负责编排，业务层继续只提供内容。
