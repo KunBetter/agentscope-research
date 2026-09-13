@@ -1,6 +1,8 @@
-# AgentScope 后续规划（2026-08-01）
+# AgentScope 后续规划（2026-08-01，2026-09-13 修订）
 
 > 本文是技术调研报告与方向脑暴之后的**决策与执行规划**。目标：把"12 个方向"收敛为一个主攻方向，给出时间盒、里程碑、验证清单与退出条件。
+>
+> **2026-09-13 修订**：确认 Python 单轨 + 阶段目标"验证多 Agent 真实增益"；M2 细化为阶段 0~4 与止损条件；版本更新至上游 2.0.8 核查；新增 [附录 A：AgentScope Java 2.0 能力对标](#附录-aagentscope-java-20-能力对标)。
 
 ---
 
@@ -107,8 +109,8 @@
 - [x] 自定义 Tool（mock 演示数据）：`get_stock_price` / `get_stock_financials`（数据层与外部数据源解耦，真实数据源按需再接入）
 - [x] 配置权限：数据工具只读，命令/写文件工具默认拒绝（2026-08-30 核对：POC 已实现并有离线测试覆盖）
 - [x] 验证结构化输出（研报 JSON Schema，v2.0.5）（2026-08-30 核对：POC 已实现并有离线测试覆盖）
-- [ ] 接入 `BudgetControlMiddleware`，记录单任务 token 成本
-- [ ] 建立首批评测集（20~50 条典型投研任务，如"某标的 PE/PB/ROE 趋势""财报数据与口径核对"）
+- [x] 接入 `BudgetControlMiddleware`，记录单任务 token 成本（实现为 `ReplyBudgetControlMiddleware`，`--budget` 开关；2026-09-13 核对）
+- [x] 建立首批评测集（stock_qa 30 / weather 10 / todo 5，共 45 条 mock 任务；2026-09-13 核对）
 
 > M1 更新（2026-08-02）：保守项基本落地——评测基线 stock_qa 20/20、
 > weather 6/6（mock 模式 100%）；预算用 2.0.5 实际类名
@@ -121,20 +123,95 @@
 
 **备选决策点**：若此阶段发现 AgentScope 2.0.5 的 DeepSeek 接入或稳定性不满足要求，切换到备选方案（LangGraph 编排或手写编排），切换成本约 1~2 天。
 
-### M2（第 3~4 周）：多 Agent 链路
+### M2（第 3~6 周）：多 Agent 链路 —— 唯一目标「验证多 Agent 的真实增益」
 
-- [ ] 数据收集 / 分析 / 风控复核 三角色 Agent 跑通
-- [ ] 风控 Agent 能发现 ≥1 类典型错误（数据口径不一致、幻觉结论）
-- [ ] 长期记忆接入（先文件型，再评估 mem0）：跨会话跟踪标的上下文
-- [ ] 事件流 + WebUI/Studio 可视化执行过程
+> **阶段目标（2026-09-13 确认）**：量化回答一个问题——把单次分析升级为多角色链路，
+> 通过率提升多少、成本增加多少。**只做能支撑这个结论的最小范围**。
+>
+> **平台决策（2026-09-13）**：**Python 单轨**，继续 `agentscope` 主线。理由：现有资产
+> （engine/domains/45 条评测/41 个测试）全部在 Python 侧；Java 版的差异化能力是分布式与
+> 多租户生产部署，本阶段用不上。Java 能力对标见 [附录 A](#附录-aagentscope-java-20-能力对标)。
 
-**退出条件**：20 个评测任务跑通，风控复核发现至少 1 类错误并修正，可追溯性（轨迹 + 引用）达标。
+#### 阶段 0（前置清账，1~2 天）
 
-### M3（第 5~6 周）：评测与集成决策
+| # | 事项 | 产出 | 说明 |
+| --- | --- | --- | --- |
+| 0.1 | 重跑 `--all` 刷新基线 | `eval/results/all_summary_*.json` + 文档数字 | 8-30 调整过任务集，当前无可信通过率。**必须最先做，否则后续对照没有基准** |
+| 0.2 | 版本决策：2.0.5 → 2.0.8 | 结论 + 测试记录 | 独立 venv 装 2.0.8 跑 `verify.sh`；重点复验"压缩后结构化输出不稳定"（2.0.8 新增 Agent 自主上下文压缩能力） |
+| 0.3 | 修正本文陈旧勾选框 | 本文档 | M1 实际已完成，勾选框原未同步（本次已修） |
+
+#### 阶段 1（第 1 周）：引擎编排能力（业务无关）
+
+设计原则延续现有分层：**引擎管"怎么执行"，领域包管"执行什么"**。
+
+- `engine/agent_engine.py` 新增角色契约：
+  - `AgentRoleSpec`：`name` / `system_prompt` / `tools`（工具名子集）/ `output_schema`（可选）/ `read_only`
+  - `RolePipeline`：角色顺序 + 角色间数据传递规则
+- `DomainPackage` 新增**可选**出口 `roles()`：默认返回 `None`，走现有单 Agent 路径（**向后兼容，现有三个领域包零改动**）
+- `AgentPipeline` 执行器：按序装配角色 → 上一角色的结构化输出作为下一角色的输入 `Msg` → 复用同一 `AgentEngine` 的模型与中间件配置
+- 轨迹记录：每个角色的工具调用与产出统一落盘，供阶段 4 审计与回放
+- **离线测试**（不调模型）：单角色回退、多角色装配顺序、工具子集隔离、失败短路、schema 透传
+
+**退出条件**：`verify.sh` 全绿；用 `weather` 领域搭一个 2 角色玩具链路证明引擎可编排，且 `stock_qa` 单角色行为零回归。
+
+#### 阶段 2（第 2 周）：stock_qa 四角色链路
+
+| 角色 | 职责 | 工具 | 输出 |
+| --- | --- | --- | --- |
+| 规划 Agent | 拆解问题、决定需要哪些数据 | 无（纯推理） | 数据需求清单（结构化） |
+| 数据收集 Agent | 按清单取数 | `get_stock_price` / `get_stock_financials`（只读） | 原始数据 + 来源标注 |
+| 分析 Agent | 财报解读、趋势判断，结论必须带引用 | 无（消费上游产出） | 分析稿（结构化） |
+| 风控复核 Agent | 校验数据口径一致性、质疑无依据结论、核对引用 | 无（只读上游产出） | 复核意见 + 修正建议 |
+
+- 权限取最小集：**仅数据收集角色持有工具**，其余角色无工具（顺带验证权限系统在链路中的表现）
+- 审计中间件：每角色的 `MODEL_CALL` / `TOOL_CALL` / 最终输出落盘为可回放轨迹
+- 预算：`--budget` 覆盖整条链路，按角色记录 token 成本
+
+**退出条件**：四角色链路端到端跑通，产出符合 `StockReport` schema，轨迹可回放。
+
+#### 阶段 3（第 3 周）：风控复核的价值验证（**本阶段核心**）
+
+这是整个 M2 唯一能证明"多 Agent 值得做"的实验。
+
+- **注入式错误测试集**：构造 15~20 条"带坑"任务，覆盖三类典型错误：
+  1. 数据口径不一致（把 PE 当 PB、报告期错配等）
+  2. 幻觉结论（数据中没有支撑的断言）
+  3. 引用错配（结论与所引数据对不上）
+- **对照实验**：同一批任务分别跑「单 Agent」与「多角色链路」，记录三个数：
+  - 通过率（沿用自建评测口径）
+  - 风控环节检出率（错误被指出的比例）
+  - token 成本 / 延迟（链路相对单 Agent 的倍数）
+- **退出条件**：风控 Agent 对 ≥1 类错误检出率 ≥ 80%。达不到则先迭代 prompt 与复核规则；两轮无改善则**如实记录失败**并触发止损条件。
+
+#### 阶段 4（第 4 周）：评测口径收敛与结论
+
+- 多 Agent 专用任务集（20~30 条）并入 `eval/tasks/`，检查项支持"风控环节是否触发"
+- 评测新增 `--compare` 模式：单 Agent vs 多 Agent 对比表（通过率 / 成本 / 延迟）
+- 可选：用官方评测框架 [OpenJudge](https://github.com/agentscope-ai/OpenJudge)（PyPI `py-openjudge`）对同一批任务做交叉验证，检验自建口径是否偏乐观
+- **退出条件（= M2 完成的定义）**：产出量化结论——多 Agent 相对单 Agent 的**通过率增益 vs 成本倍数**，结论无论正负都入库。
+
+#### 止损条件
+
+任一条件触发即停止加码，转为"单 Agent 结论"并直接进入 M3：
+
+1. 阶段 3 风控检出率 < 60% 且两轮 prompt 迭代无改善；
+2. 多 Agent 通过率提升 < 5 个百分点，而 token 成本 > 3 倍；
+3. 2.0.5 / 2.0.8 在链路场景下出现无法绕过的稳定性问题。
+
+#### 本阶段明确不做
+
+- ❌ WebUI / Studio 可视化（事件轨迹先落盘，能回放即可）
+- ❌ 真实数据源（Tushare / AKShare）——mock 足以支撑对照实验
+- ❌ mem0 / 向量库等新记忆后端（文件型长期记忆已够）
+- ❌ 新沙箱后端、K8s / E2B 等基础设施
+- ❌ Java 平台迁移（结论见附录 A）
+- ❌ 引入官方评测依赖（OpenJudge 仅作可选交叉验证）
+
+### M3（第 7~8 周）：评测与集成决策（M2 通过后再启动）
 
 - [ ] 用评测集对比：多 Agent 链路 vs 现有 `analyze_growth_potential.py` 单次分析
 - [ ] 评估集成方式：独立服务（Agent Service）或与现有业务系统集成（待定）
-- [ ] 沉淀模板与中间件（审计日志、预算、只读策略）
+- [ ] 沉淀可复用模板与中间件（审计日志、预算、只读策略）
 - [ ] 输出集成方案文档
 
 **退出条件**：评测数据支撑"值得集成"的结论，且集成方案获得确认。
@@ -154,12 +231,15 @@
 
 ---
 
-## 6. 建议的行动顺序（下一步）
+## 6. 下一步行动（2026-09-13 更新）
 
-1. **今天**：确认本规划（特别是方向选择），创建 POC 目录/仓库；
-2. **本周**：安装 `agentscope==2.0.5` 独立环境，跑通 Quickstart + DeepSeek 接入；
-3. **下周起**：按 M1 → M2 → M3 推进，每个里程碑有明确退出条件；
-4. **M3 后**：根据评测结果决定集成方式，以及是否启动方向 1（RAG 知识库）。
+M0 / M1 已完成，当前起点是 M2 阶段 0：
+
+1. **先清账（阶段 0.1）**：重跑 `poc/eval/run_eval.py --all` 刷新 45 条基线，把可信通过率写回本文与 `poc/README.md`（此前任务集调整后未重跑，现无可信数字）；
+2. **再定版本（阶段 0.2）**：独立 venv 装 `agentscope==2.0.8` 跑 `verify.sh`，复验压缩稳定性；通过则升级并同步 `requirements.txt`，不通过则维持 2.0.5 并记录原因；
+3. **然后进阶段 1**：在 `engine/` 加 `AgentRoleSpec` / `AgentPipeline` 与 `DomainPackage.roles()` 可选出口，用 `weather` 做 2 角色玩具验证；
+4. **按阶段 1 → 2 → 3 → 4 推进**，每阶段有明确退出条件与止损条件；
+5. **M2 结束后**：按量化结论决定是否进入 M3（集成决策），以及是否启动方向 1（RAG 知识库）。
 
 ---
 
@@ -180,7 +260,80 @@
 | 2026-08-02 | 阶段 4（官方评测验证） | 验证结论：`agentscope==2.0.5` 安装包无评测模块（子模块/导出均无 eval），官方 Evaluation API 对比接入不可行；保守替代：自建评测新增 `--all` 跨领域汇总。全量 45 条一次汇总 43/45（95.6%），两条失败为检查词表未覆盖 LLM 措辞变体，已修复并单独验证 |
 | 2026-08-02 | 长期记忆 + 版本复核 | 文件型长期记忆接入：`--memory-dir` 启用 `AgenticMemoryMiddleware` + 受控 Read/Write 工具（Write 仅允许写记忆目录），跨会话取回端到端验证通过。版本复核：`pip index versions agentscope` 显示最新仍为 2.0.5，暂无升级目标；压缩后结构化输出不稳定为间歇性（复验触发两次压缩未见失败），官方评测模块缺失结论维持 |
 | 2026-08-30 | 工程卫生加固 | 依赖清单 `requirements.txt`/`requirements-dev.txt`（锁版本）；`eval/results/` 产物 gitignore 不入库；缺失 API Key 改抛 `MissingApiKeyError`（CLI 退出码 2）；todo 写工具确认后真实写入（装配时重置状态）；评测任务集 sq-013~015 去重替换补覆盖（新增 PB/PE 数据点）；`--all` 汇总落盘；规划 M1 勾选框同步；`verify.sh` 支持新 venv 回退；新增 env_loader 与 todo 写入离线测试 |
+| 2026-09-13 | M2 路线图 + 版本/生态核查 | 确认平台决策（Python 单轨）与阶段目标（验证多 Agent 真实增益），M2 细化为阶段 0~4 + 止损条件；修正 M1 陈旧勾选框；版本核查：PyPI 最新 **2.0.8**（2026-09-08），本项目锁 2.0.5；**更正"官方评测缺失"结论**——评测在独立仓库 OpenJudge，不在 `agentscope` 包内（已核对 2.0.5/2.0.8 wheel）；新增 Java 2.0 能力对标（附录 A） |
 
-**当前状态**：M0 ✅；架构升级 ✅；M1 全部 ✅（任务集调整后基线数字待重跑 `--all` 刷新）；
-文件型长期记忆接入并通过跨会话验证；版本复核：2.0.5 为 PyPI 最新（升级路径暂无目标）
-→ 待新版本发布后复验压缩/评测模块；多 Agent（M2）与真实数据源按需再评估。
+**当前状态**（2026-09-13）：M0 ✅；架构升级 ✅；M1 全部 ✅（45 条评测集已入库，`--all` 基线数字待重跑刷新）；
+文件型长期记忆 ✅ 跨会话验证通过；版本：锁定 2.0.5，上游最新 2.0.8（阶段 0.2 决策）；
+M2 多 Agent 链路路线图已细化，起点为阶段 0（清账 + 版本决策）→ 阶段 1（引擎编排能力）。
+
+---
+
+## 附录 A：AgentScope Java 2.0 能力对标
+
+> 核查时间：2026-09-13 ｜ 来源：`github.com/agentscope-ai/agentscope-java` 源码树、release notes、官方文档（`java.agentscope.io/v2/en/docs`）
+
+### A.1 基本盘
+
+| 维度 | 内容 |
+| --- | --- |
+| 定位 | Build distributed, production-grade, long-running agents |
+| 最新版本 | **v2.0.3**（2026-09-07）；v2.0.0 GA 于 2026-07-10 |
+| 要求 | JDK 17+；Apache-2.0 |
+| 体量 | 5,580 stars / 1,347 forks / 877 open issues；最后 push 2026-09-12 |
+| 文档 | <https://java.agentscope.io/>（v2 中英文档） |
+
+### A.2 模块结构（Maven 多模块）
+
+| 模块 | 职责 |
+| --- | --- |
+| `agentscope-core` | 基础框架：ReActAgent、message、event、model、tool、permission、middleware、memory、state、skill、rag、formatter、credential、hook、interruption、shutdown、tracing |
+| `agentscope-harness` | 工程化外壳 `HarnessAgent`：workspace、plan、memory、sandbox、subagent、team、skill、tool、transcript、artifact、bus、coordination、gateway |
+| `agentscope-extensions` | 21 个扩展模块（模型 / 沙箱 / 存储 / RAG / 协议 / 通道） |
+| `agentscope-service` | Agent 控制平面 + Dashboard（Go `aistiod` 控制面 + Java gateway / dataplane / scheduler） |
+| `agentscope-examples` / `-distribution` / `-dependencies-bom` | 示例 / 发行包 / 依赖版本统一管理 |
+
+### A.3 三大设计支柱
+
+**① Harness 工程（为长任务而生）**：`HarnessAgent` 是 `ReActAgent` 的薄包装，能力通过 Middleware + Toolkit 挂载，推理内核零改动。
+
+| 能力 | 内容 |
+| --- | --- |
+| Workspace 驱动人格 | persona / knowledge / subagent spec / skills / MCP allowlist 文件化（`AGENTS.md`、`workspace/tools.json`）；系统提示每轮重建，改文件即时生效 |
+| 分层记忆 | 上下文会话 → agent 自维护 `MEMORY.md` → 磁盘 append-only 事实日志（`memory/YYYY-MM-DD.md`），限流后台合并 |
+| 自动上下文管理 | 结构化压缩保留 goals/state/findings/next steps；>80K 字符工具结果卸载到磁盘；上下文溢出重试兜底 |
+| 子 Agent | Markdown 声明 spec，`agent_spawn` / `agent_send` 运行时编排，同步或后台委派，结果经 `system-reminder` 推回 |
+| Plan Mode | 只读规划态，计划持久化在 `workspace/plans/` 并驱动执行，HITL 退出 |
+| 技能自进化 | 成功模式存为 Markdown 技能；仓库支持 Git / Nacos / MySQL / classpath / workspace |
+| 沙箱隔离 | 本地子进程 / Docker / Kubernetes / E2B / Daytona / AgentRun，带快照恢复；文件系统可插拔 |
+| Agent 团队 | `TeamClient`（含 `LocalTeamClient`）+ `TeamCreateSpec` / `TeamMemberSpec` / `TeamTask` / `TeamMessage` / `TeamWakeups` |
+| Channel | 会话管理、每会话并发、多 Agent 路由、流式事件；IM 通道（钉钉 / 飞书 / 企微等） |
+
+**② 企业级分布式**：`IsolationScope` 四维隔离（session / user / agent / org）；`DistributedStore` 一行接入实现无状态水平扩展与跨副本会话恢复；`AgentStateStore` 支持内存 / JSON 文件 / MySQL / Redis / PostgreSQL；v2.0.3 新增 `VersionedState` + `ConflictPolicy` 乐观并发；Docker / docker-compose / Helm 部署。
+
+**③ 精简基础框架**：31 个类型化事件、统一 `call()` / `streamEvents()` 执行核心；`ContentBlock` 统一多模态消息；AOP 式**五阶段**中间件（`onAgent` / `onReasoning` / `onActing` / `onModelCall` / `onSystemPrompt`）；`ModelRegistry` 字符串解析 + SPI 发现；三态权限；MCP 集成；原生结构化输出；`interruption` 优雅中断 + pending tool 恢复。
+
+**④ 协议与生态**：AG-UI（SSE 事件流，含 CopilotKit 全栈示例）、A2A、OpenAI SDK 兼容；扩展覆盖 5 个模型 provider、4 个沙箱后端、8 类存储后端、RAG / mem / nacos / scheduler / studio / training / Spring Boot starters / Higress。
+
+### A.4 与本项目相关的两个坑
+
+1. **DeepSeek 走 OpenAI 兼容路径**（非独立 provider）：`deepseek:deepseek-v4-flash` + `DEEPSEEK_API_KEY`，core 内有 `DeepSeekCredential`。官方文档明确：**工具与结构化输出同时存在时，DeepSeek / Kimi 会优先满足 `response_format` 而跳过 tool calling**，需 `nativeStructuredOutputWithTools(false)`。这与本项目 Python 侧遇到的"压缩后结构化输出不稳定"是同类问题。
+2. **Java 版同样无内置评测模块**：与 Python 侧一致，评测统一在独立仓库 [OpenJudge](https://github.com/agentscope-ai/OpenJudge)。
+
+### A.5 Java 2.0 vs Python 2.0
+
+| 维度 | Java 2.0 | Python 2.0 |
+| --- | --- | --- |
+| 定位 | 分布式、企业级、长运行 | 功能最全、迭代最快 |
+| 最新版 | v2.0.3（09-07） | 2.0.8（09-08） |
+| 独有强项 | HarnessAgent 双层架构、Plan Mode、subagent Markdown 声明、Team 协作、跨副本会话恢复、Go 控制平面、Spring Boot / Helm / K8s | `pipeline`(GoalPipeline)、`console`、`realtime`(语音)、`tts`、`embedding`、更多沙箱后端（bubblewrap / OpenSandbox / Apple Container）、skill hub、`app`(Web UI 多租户服务) |
+| 共有 | ReActAgent 内核、事件系统、三态权限、中间件、MCP、原生结构化输出、分层记忆、沙箱抽象 | 同左 |
+
+### A.6 结论
+
+**本阶段维持 Python 单轨**。Java 版的差异化价值集中在"分布式 + 多租户 + 控制平面"，属于生产部署阶段的问题，而本项目当前阶段要回答的是"多 Agent 是否真有增益"——这是模型编排与提示工程问题，与平台语言无关，Python 侧资产（engine / domains / 45 条评测 / 41 个测试）可直接复用。
+
+**重新评估的触发条件**（满足任一则重开 Java 议题）：
+
+- M2/M3 结论为"值得集成"，且集成形态要求多租户、跨副本会话恢复或 K8s 部署；
+- 需要 IM 通道（钉钉 / 飞书 / 企微）或 Spring Boot 生态集成；
+- Python 侧在并发与长任务稳定性上出现无法绕过的问题。
